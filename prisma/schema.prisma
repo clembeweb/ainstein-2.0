@@ -1,0 +1,253 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Platform Settings (Accessible only to Super Admin)
+model PlatformSettings {
+  id              String   @id @default(cuid())
+  openaiApiKey    String?
+  openaiModel     String   @default("gpt-4o")
+  stripeSecretKey String?
+  stripeWebhook   String?
+  smtpHost        String?
+  smtpPort        Int?
+  smtpUser        String?
+  smtpPass        String?
+  googleClientId  String?
+  googleClientSecret String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// Tenant (Organization)
+model Tenant {
+  id                  String   @id @default(cuid())
+  name                String
+  domain              String?  @unique
+  subdomain           String   @unique
+  planType            String   @default("starter")
+  tokensMonthlyLimit  Int      @default(10000)
+  tokensUsedCurrent   Int      @default(0)
+  status              String   @default("active")
+  themeConfig         String   @default("{}")
+  brandConfig         String   @default("{}")
+  features            String   @default("")
+  stripeCustomerId    String?
+  stripeSubscriptionId String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  users               User[]
+  pages               Page[]
+  contentGenerations  ContentGeneration[]
+  prompts             Prompt[]
+  cmsConnections      CmsConnection[]
+  gscConnections      GscConnection[]
+  apiKeys             ApiKey[]
+  webhooks            Webhook[]
+  usageHistory        UsageHistory[]
+}
+
+// User
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  passwordHash    String
+  name            String?
+  avatar          String?
+  role            String   @default("member")
+  isSuperAdmin    Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  emailVerified   Boolean  @default(false)
+  preferences     String   @default("{}")
+  lastLogin       DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenantId        String?
+  tenant          Tenant?  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  sessions        Session[]
+  activities      ActivityLog[]
+}
+
+// Session Management
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Pages
+model Page {
+  id             String   @id @default(cuid())
+  urlPath        String
+  keyword        String?
+  category       String?
+  language       String   @default("it")
+  cmsType        String?
+  cmsPageId      String?
+  status         String   @default("pending")
+  priority       Int      @default(0)
+  metadata       String   @default("{}")
+  lastSynced     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  generations    ContentGeneration[]
+
+  @@unique([tenantId, urlPath])
+  @@index([tenantId, status])
+}
+
+// Content Generations
+model ContentGeneration {
+  id              String   @id @default(cuid())
+  promptType      String
+  generatedContent String?
+  metaTitle       String?
+  metaDescription String?
+  tokensUsed      Int      @default(0)
+  aiModel         String
+  status          String   @default("pending")
+  error           String?
+  publishedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  pageId          String
+  page            Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+  @@index([pageId])
+}
+
+// Prompt Templates
+model Prompt {
+  id              String   @id @default(cuid())
+  name            String
+  alias           String
+  description     String?
+  template        String
+  variables       String   @default("[]")
+  category        String?
+  isActive        Boolean  @default(true)
+  isSystem        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, alias])
+}
+
+// CMS Connections
+model CmsConnection {
+  id              String   @id @default(cuid())
+  name            String
+  type            String
+  endpoint        String
+  apiKey          String?
+  apiSecret       String?
+  additionalConfig String  @default("{}")
+  isActive        Boolean  @default(true)
+  lastSyncAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, name])
+}
+
+// Google Search Console Connections
+model GscConnection {
+  id              String   @id @default(cuid())
+  propertyUrl     String
+  accessToken     String?
+  refreshToken    String?
+  expiresAt       DateTime?
+  isActive        Boolean  @default(true)
+  connectedAt     DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, propertyUrl])
+}
+
+// API Keys for Tenant
+model ApiKey {
+  id              String   @id @default(cuid())
+  name            String
+  key             String   @unique
+  lastUsed        DateTime?
+  expiresAt       DateTime?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+// Webhooks
+model Webhook {
+  id              String   @id @default(cuid())
+  url             String
+  events          String
+  secret          String
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+// Usage History
+model UsageHistory {
+  id              String   @id @default(cuid())
+  month           String
+  tokensUsed      Int      @default(0)
+  pagesGenerated  Int      @default(0)
+  apiCalls        Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, month])
+}
+
+// Activity Log
+model ActivityLog {
+  id              String   @id @default(cuid())
+  action          String
+  entity          String
+  entityId        String?
+  metadata        String   @default("{}")
+  ipAddress       String?
+  userAgent       String?
+  createdAt       DateTime @default(now())
+
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
