@@ -1,0 +1,30 @@
+🎯 ADMIN PANEL - TUTTE LE PAGINE DISPONIBILI
+
+📊 DASHBOARD
+http://127.0.0.1:8080/admin
+
+👥 USERS MANAGEMENT
+http://127.0.0.1:8080/admin/users
+http://127.0.0.1:8080/admin/users/create
+
+🏢 TENANTS MANAGEMENT
+http://127.0.0.1:8080/admin/tenants
+http://127.0.0.1:8080/admin/tenants/create
+
+💳 SUBSCRIPTIONS
+http://127.0.0.1:8080/admin/subscriptions
+
+⚙️ SETTINGS (API Configuration)
+http://127.0.0.1:8080/admin/settings
+
+📝 AI PROMPTS LIBRARY
+http://127.0.0.1:8080/admin/prompts
+http://127.0.0.1:8080/admin/prompts/create
+
+---
+
+🔐 LOGIN: superadmin@ainstein.com / admin123
+
+⚠️ SE NON VEDI I LINK NELLA SIDEBAR:
+Le pagine funzionano comunque! Basta digitare l'URL direttamente.
+Il problema potrebbe essere nel navigationSort o navigationGroup.

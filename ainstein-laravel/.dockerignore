@@ -1,0 +1,62 @@
+# Laravel specific
+/.env
+/.env.backup
+/.env.production
+/.phpunit.result.cache
+/node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/vendor
+
+# IDE and editor files
+/.vscode
+/.idea
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+/README.md
+/DEPLOYMENT.md
+
+# Development files
+/tests
+*.log
+/storage/logs/*
+
+# Build artifacts
+/public/build
+/resources/js/build
+/resources/css/build
+
+# Backup files
+*.backup
+*.bak
+*.tmp
+
+# Docker files (avoid recursion)
+/Dockerfile*
+/docker-compose*.yml
+/.dockerignore
+
+# Scripts (will be copied separately if needed)
+/scripts
+
+# Local development
+/laragon
+*.local

@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ainstein-laravel:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_HOST=mysql
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
+      - CACHE_STORE=redis
+      - SESSION_DRIVER=redis
+      - QUEUE_CONNECTION=redis
+    depends_on:
+      - mysql
+      - redis
+    volumes:
+      - storage:/var/www/html/storage/app
+      - logs:/var/www/html/storage/logs
+    networks:
+      - ainstein-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    networks:
+      - ainstein-network
+    command: --default-authentication-plugin=mysql_native_password
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - ainstein-network
+
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy:latest
+    restart: unless-stopped
+    ports:
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - certs:/etc/nginx/certs:ro
+      - vhost.d:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+    networks:
+      - ainstein-network
+    depends_on:
+      - app
+
+  letsencrypt:
+    image: nginxproxy/acme-companion:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - vhost.d:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - acme:/etc/acme.sh
+    environment:
+      - DEFAULT_EMAIL=${LETSENCRYPT_EMAIL}
+    networks:
+      - ainstein-network
+    depends_on:
+      - nginx-proxy
+
+volumes:
+  mysql_data:
+  redis_data:
+  storage:
+  logs:
+  certs:
+  vhost.d:
+  html:
+  acme:
+
+networks:
+  ainstein-network:
+    driver: bridge

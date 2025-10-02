@@ -1,0 +1,249 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\ContentGenerationResource\Pages;
+use App\Models\ContentGeneration;
+use App\Models\Page;
+use App\Models\Tenant;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+
+class ContentGenerationResource extends Resource
+{
+    protected static ?string $model = ContentGeneration::class;
+
+
+    protected static ?string $recordTitleAttribute = 'prompt_type';
+
+    protected static ?string $navigationLabel = 'Content Generations';
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Section::make('Generation Information')
+                    ->schema([
+                        Forms\Components\Select::make('prompt_type')
+                            ->options([
+                                'meta_title' => 'Meta Title',
+                                'meta_description' => 'Meta Description',
+                                'heading' => 'Heading',
+                                'content' => 'Content',
+                                'product_description' => 'Product Description',
+                                'blog_post' => 'Blog Post',
+                                'custom' => 'Custom',
+                            ])
+                            ->required()
+                            ->live(),
+                        Forms\Components\Textarea::make('generated_content')
+                            ->label('Generated Content')
+                            ->rows(6)
+                            ->maxLength(65535)
+                            ->columnSpanFull(),
+                    ])->columns(2),
+
+                Forms\Components\Section::make('SEO Meta Data')
+                    ->schema([
+                        Forms\Components\TextInput::make('meta_title')
+                            ->maxLength(255)
+                            ->placeholder('SEO meta title'),
+                        Forms\Components\Textarea::make('meta_description')
+                            ->maxLength(500)
+                            ->rows(3)
+                            ->placeholder('SEO meta description'),
+                    ])->columns(1),
+
+                Forms\Components\Section::make('AI Configuration')
+                    ->schema([
+                        Forms\Components\TextInput::make('tokens_used')
+                            ->numeric()
+                            ->default(0)
+                            ->disabled()
+                            ->dehydrated(false),
+                        Forms\Components\Select::make('ai_model')
+                            ->options([
+                                'gpt-3.5-turbo' => 'GPT-3.5 Turbo',
+                                'gpt-4' => 'GPT-4',
+                                'gpt-4-turbo' => 'GPT-4 Turbo',
+                                'claude-3-haiku' => 'Claude 3 Haiku',
+                                'claude-3-sonnet' => 'Claude 3 Sonnet',
+                                'claude-3-opus' => 'Claude 3 Opus',
+                            ])
+                            ->default('gpt-3.5-turbo'),
+                    ])->columns(2),
+
+                Forms\Components\Section::make('Status & Relationships')
+                    ->schema([
+                        Forms\Components\Select::make('status')
+                            ->options([
+                                'pending' => 'Pending',
+                                'processing' => 'Processing',
+                                'completed' => 'Completed',
+                                'failed' => 'Failed',
+                                'published' => 'Published',
+                            ])
+                            ->default('pending')
+                            ->required(),
+                        Forms\Components\Select::make('page_id')
+                            ->label('Page')
+                            ->relationship('page', 'url_path')
+                            ->searchable()
+                            ->preload(),
+                        Forms\Components\Select::make('tenant_id')
+                            ->label('Tenant')
+                            ->relationship('tenant', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->required(),
+                    ])->columns(3),
+
+                Forms\Components\Section::make('Error & Publishing')
+                    ->schema([
+                        Forms\Components\Textarea::make('error')
+                            ->rows(3)
+                            ->maxLength(65535)
+                            ->placeholder('Error message (if any)'),
+                        Forms\Components\DateTimePicker::make('published_at')
+                            ->label('Published At'),
+                    ])->columns(2)->collapsed(),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('prompt_type')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'meta_title' => 'info',
+                        'meta_description' => 'success',
+                        'heading' => 'warning',
+                        'content' => 'primary',
+                        'product_description' => 'secondary',
+                        'blog_post' => 'danger',
+                        'custom' => 'gray',
+                    }),
+                Tables\Columns\TextColumn::make('generated_content')
+                    ->limit(50)
+                    ->tooltip(function (ContentGeneration $record): ?string {
+                        return $record->generated_content;
+                    })
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('meta_title')
+                    ->limit(30)
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('meta_description')
+                    ->limit(40)
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('tokens_used')
+                    ->numeric()
+                    ->sortable()
+                    ->badge()
+                    ->color('info'),
+                Tables\Columns\TextColumn::make('ai_model')
+                    ->badge()
+                    ->color('secondary')
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending' => 'gray',
+                        'processing' => 'warning',
+                        'completed' => 'success',
+                        'failed' => 'danger',
+                        'published' => 'info',
+                    }),
+                Tables\Columns\TextColumn::make('page.url_path')
+                    ->label('Page')
+                    ->limit(30)
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('tenant.name')
+                    ->label('Tenant')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('published_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('prompt_type')
+                    ->options([
+                        'meta_title' => 'Meta Title',
+                        'meta_description' => 'Meta Description',
+                        'heading' => 'Heading',
+                        'content' => 'Content',
+                        'product_description' => 'Product Description',
+                        'blog_post' => 'Blog Post',
+                        'custom' => 'Custom',
+                    ]),
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'processing' => 'Processing',
+                        'completed' => 'Completed',
+                        'failed' => 'Failed',
+                        'published' => 'Published',
+                    ]),
+                Tables\Filters\SelectFilter::make('ai_model')
+                    ->options([
+                        'gpt-3.5-turbo' => 'GPT-3.5 Turbo',
+                        'gpt-4' => 'GPT-4',
+                        'gpt-4-turbo' => 'GPT-4 Turbo',
+                        'claude-3-haiku' => 'Claude 3 Haiku',
+                        'claude-3-sonnet' => 'Claude 3 Sonnet',
+                        'claude-3-opus' => 'Claude 3 Opus',
+                    ]),
+                Tables\Filters\SelectFilter::make('tenant')
+                    ->relationship('tenant', 'name'),
+                Tables\Filters\Filter::make('has_errors')
+                    ->label('Has Errors')
+                    ->query(fn (Builder $query): Builder => $query->whereNotNull('error')),
+            ])
+            ->actions([
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ])
+            ->defaultSort('created_at', 'desc');
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListContentGenerations::route('/'),
+            'create' => Pages\CreateContentGeneration::route('/create'),
+            'view' => Pages\ViewContentGeneration::route('/{record}'),
+            'edit' => Pages\EditContentGeneration::route('/{record}/edit'),
+        ];
+    }
+}
