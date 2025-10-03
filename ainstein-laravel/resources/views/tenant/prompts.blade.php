@@ -14,6 +14,9 @@
             </div>
 
             <div class="flex space-x-3">
+                <button onclick="window.startPromptsOnboarding()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
+                    <i class="fas fa-question-circle mr-2"></i>Inizia Tour
+                </button>
                 <button class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-medium">
                     <i class="fas fa-plus mr-2"></i>Create Prompt
                 </button>

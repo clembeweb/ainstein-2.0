@@ -12,6 +12,12 @@
                 <h3 class="text-lg font-semibold text-gray-900">Content Generations</h3>
                 <p class="text-gray-600">Monitor and manage your AI content generations</p>
             </div>
+
+            <div>
+                <button onclick="window.startContentGenerationOnboarding()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
+                    <i class="fas fa-question-circle mr-2"></i>Inizia Tour
+                </button>
+            </div>
         </div>
 
         <!-- Filters -->

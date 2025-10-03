@@ -85,6 +85,7 @@ class DatabaseSeeder extends Seeder
                 'email_verified' => true,
                 'tenant_id' => $demoTenant->id
             ]);
+            $demoMember = $member; // Store reference for later use
             echo "✅ Demo member created: {$member->email}\n";
 
             // Create default prompts for demo tenant

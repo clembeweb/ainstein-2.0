@@ -108,6 +108,11 @@ Route::middleware(['auth', \App\Http\Middleware\CheckMaintenanceMode::class, \Ap
     // Onboarding routes
     Route::post('/onboarding/complete', [\App\Http\Controllers\OnboardingController::class, 'complete'])->name('onboarding.complete');
     Route::post('/onboarding/reset', [\App\Http\Controllers\OnboardingController::class, 'reset'])->name('onboarding.reset');
+    Route::get('/onboarding/status', [\App\Http\Controllers\OnboardingController::class, 'status'])->name('onboarding.status');
+
+    // Tool-specific onboarding routes
+    Route::post('/onboarding/tool/{tool}/complete', [\App\Http\Controllers\OnboardingController::class, 'completeToolOnboarding'])->name('onboarding.tool.complete');
+    Route::post('/onboarding/tool/{tool}/reset', [\App\Http\Controllers\OnboardingController::class, 'resetToolOnboarding'])->name('onboarding.tool.reset');
 });
 
 // API Documentation

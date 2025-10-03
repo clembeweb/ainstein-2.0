@@ -30,6 +30,7 @@ class User extends Authenticatable implements FilamentUser
         'email_verified',
         'email_verified_at',
         'onboarding_completed',
+        'onboarding_tools_completed',
         'preferences',
         'last_login',
         'tenant_id',
@@ -45,6 +46,7 @@ class User extends Authenticatable implements FilamentUser
 
     protected $casts = [
         'preferences' => 'array',
+        'onboarding_tools_completed' => 'array',
         'is_super_admin' => 'boolean',
         'is_active' => 'boolean',
         'email_verified' => 'boolean',
@@ -145,6 +147,35 @@ class User extends Authenticatable implements FilamentUser
 
         // Fallback to Gravatar
         return 'https://www.gravatar.com/avatar/' . md5(strtolower(trim($this->email))) . '?d=mp&s=150';
+    }
+
+    // Onboarding tools helper methods
+    public function hasCompletedToolOnboarding(string $tool): bool
+    {
+        $completed = $this->onboarding_tools_completed ?? [];
+        return in_array($tool, $completed);
+    }
+
+    public function markToolOnboardingComplete(string $tool): void
+    {
+        $completed = $this->onboarding_tools_completed ?? [];
+
+        if (!in_array($tool, $completed)) {
+            $completed[] = $tool;
+            $this->onboarding_tools_completed = $completed;
+            $this->save();
+        }
+    }
+
+    public function resetToolOnboarding(string $tool = null): void
+    {
+        if ($tool) {
+            $completed = $this->onboarding_tools_completed ?? [];
+            $this->onboarding_tools_completed = array_diff($completed, [$tool]);
+        } else {
+            $this->onboarding_tools_completed = [];
+        }
+        $this->save();
     }
 
     // Filament User Implementation

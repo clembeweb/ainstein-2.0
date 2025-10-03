@@ -129,10 +129,13 @@ class TenantDashboardController extends Controller
                 ->withCount(['generations' => function ($query) {
                     $query->where('status', 'completed');
                 }])
-                ->having('generations_count', '>', 0)
-                ->orderByDesc('generations_count')
-                ->limit(5)
-                ->get();
+                ->get()
+                ->filter(function ($page) {
+                    return $page->generations_count > 0;
+                })
+                ->sortByDesc('generations_count')
+                ->take(5)
+                ->values();
 
             // Recent activity (last 7 days)
             $recentActivity = [
@@ -184,17 +187,45 @@ class TenantDashboardController extends Controller
             Log::error('Dashboard data loading failed', [
                 'tenant_id' => $tenant->id,
                 'user_id' => $user->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             if (request()->expectsJson()) {
                 return response()->json(['error' => 'Failed to load dashboard data'], 500);
             }
 
-            return view('tenant.dashboard', [
-                'error' => 'Failed to load dashboard data. Please try again.',
-                'tenant' => $tenant
-            ]);
+            // Provide default values for error state
+            $planInfo = [
+                'name' => ucfirst($tenant->plan_type ?? 'free'),
+                'tokens_limit' => $tenant->tokens_monthly_limit ?? 0,
+                'tokens_used' => $tenant->tokens_used_current ?? 0,
+                'pages_limit' => 0,
+                'api_keys_limit' => 0,
+            ];
+
+            $tokenStats = [
+                'total_tokens_used' => $tenant->tokens_used_current ?? 0,
+                'monthly_limit' => $tenant->tokens_monthly_limit ?? 0,
+                'remaining_tokens' => 0,
+                'usage_percent' => 0,
+            ];
+
+            $stats = [];
+            $apiKeyStats = [];
+            $pageStats = [];
+            $pagesByCategory = collect();
+            $generationTrends = [];
+            $recentPages = collect();
+            $recentGenerations = collect();
+            $topPages = collect();
+            $recentActivity = [];
+
+            return view('tenant.dashboard', compact(
+                'stats', 'apiKeyStats', 'pageStats', 'pagesByCategory', 'generationTrends',
+                'tokenStats', 'recentPages', 'recentGenerations', 'topPages', 'recentActivity',
+                'planInfo', 'tenant'
+            ));
         }
     }
 
