@@ -96,6 +96,21 @@ class Tenant extends Model
         return $this->hasMany(ActivityLog::class);
     }
 
+    public function toolSettings(): HasMany
+    {
+        return $this->hasMany(ToolSetting::class);
+    }
+
+    public function contentImports(): HasMany
+    {
+        return $this->hasMany(ContentImport::class);
+    }
+
+    public function contents(): HasMany
+    {
+        return $this->hasMany(Content::class);
+    }
+
     // Scopes
     public function scopeActive($query)
     {

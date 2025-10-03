@@ -51,9 +51,15 @@ class ContentGeneration extends Model
     }
 
     // Relationships
+    public function content(): BelongsTo
+    {
+        return $this->belongsTo(Content::class, 'page_id'); // page_id column references contents table
+    }
+
+    // Legacy support - alias for backward compatibility
     public function page(): BelongsTo
     {
-        return $this->belongsTo(Page::class);
+        return $this->content();
     }
 
     public function tenant(): BelongsTo
