@@ -6,6 +6,8 @@ use App\Models\Page;
 use App\Models\ContentGeneration;
 use App\Models\Prompt;
 use App\Models\ApiKey;
+use App\Models\AdvCampaign;
+use App\Models\AdvGeneratedAsset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -90,6 +92,17 @@ class TenantDashboardController extends Controller
                 : 0;
 
             $stats['success_rate'] = $successRate;
+
+            // Campaign Generator statistics
+            $campaignStats = [
+                'total_campaigns' => AdvCampaign::where('tenant_id', $tenant->id)->count(),
+                'rsa_campaigns' => AdvCampaign::where('tenant_id', $tenant->id)->where('type', 'rsa')->count(),
+                'pmax_campaigns' => AdvCampaign::where('tenant_id', $tenant->id)->where('type', 'pmax')->count(),
+                'total_assets' => AdvGeneratedAsset::whereHas('campaign', function($q) use ($tenant) {
+                    $q->where('tenant_id', $tenant->id);
+                })->count(),
+                'campaign_tokens' => AdvCampaign::where('tenant_id', $tenant->id)->sum('tokens_used') ?: 0,
+            ];
 
             // Token statistics (simplified)
             $tokenStats = [
@@ -178,7 +191,7 @@ class TenantDashboardController extends Controller
             }
 
             return view('tenant.dashboard', compact(
-                'stats', 'apiKeyStats', 'pageStats', 'pagesByCategory', 'generationTrends',
+                'stats', 'apiKeyStats', 'pageStats', 'campaignStats', 'pagesByCategory', 'generationTrends',
                 'tokenStats', 'recentPages', 'recentGenerations', 'topPages', 'recentActivity',
                 'planInfo', 'tenant'
             ));
@@ -222,7 +235,7 @@ class TenantDashboardController extends Controller
             $recentActivity = [];
 
             return view('tenant.dashboard', compact(
-                'stats', 'apiKeyStats', 'pageStats', 'pagesByCategory', 'generationTrends',
+                'stats', 'apiKeyStats', 'pageStats', 'campaignStats', 'pagesByCategory', 'generationTrends',
                 'tokenStats', 'recentPages', 'recentGenerations', 'topPages', 'recentActivity',
                 'planInfo', 'tenant'
             ));

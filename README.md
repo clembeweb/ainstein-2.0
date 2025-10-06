@@ -2,6 +2,25 @@
 
 **Laravel 12.31.1** | **Multi-Tenancy** | **Token-based Billing** | **AI-First Tools**
 
+**Last Updated**: 2025-10-06
+**Status**: ✅ **Production Ready** - Layer 2 Complete (100% tested)
+
+---
+
+## 🎉 LATEST UPDATES (2025-10-06)
+
+✅ **Content Generator Unified** - 3-tab interface (Pages/Generations/Prompts)
+✅ **Action Buttons Fixed** - View/Edit/Copy/Delete now visible and functional
+✅ **FontAwesome Integration** - Global icon library added to layouts
+✅ **Comprehensive Documentation** - Architecture Overview + 6-month Roadmap
+✅ **OpenAI Service** - Production-ready (11/11 tests passing)
+✅ **Guided Onboarding** - 13-step interactive tour complete
+
+**See**:
+- [`SESSION-REPORT-2025-10-06.md`](SESSION-REPORT-2025-10-06.md) - Today's bug fixes and documentation
+- [`ARCHITECTURE-OVERVIEW.md`](ARCHITECTURE-OVERVIEW.md) - Complete technical architecture (66 KB)
+- [`DEVELOPMENT-ROADMAP.md`](DEVELOPMENT-ROADMAP.md) - 6-month development plan (72 KB)
+
 ---
 
 ## 📋 Quick Start
@@ -99,14 +118,35 @@ docs/
 
 ## 🚀 Setup Locale
 
-### Requisiti
-- PHP 8.2+
-- Composer
+### ⚡ Installazione Automatica (Consigliata)
+
+```bash
+# Clone repository
+git clone https://github.com/[username]/ainstein-3.git ainstein
+cd ainstein
+
+# Esegui installer automatico
+bash install.sh
+```
+
+Lo script verificherà requisiti, installerà dipendenze, configurerà database e avvierà il server automaticamente.
+
+**Per Claude**: Vedi [`CLAUDE-INSTALL-PROMPT.md`](CLAUDE-INSTALL-PROMPT.md) per installazione automatica tramite AI.
+
+---
+
+### 📖 Installazione Manuale
+
+Guida completa: [`INSTALLATION-GUIDE.md`](INSTALLATION-GUIDE.md)
+
+**Requisiti**:
+- PHP 8.3+
+- Composer 2.6+
 - Node.js 18+
 - MySQL/SQLite
-- Redis (opzionale, per queue)
+- Git
 
-### Installazione
+**Step rapidi**:
 
 ```bash
 # Clone repository
@@ -122,6 +162,7 @@ cp .env.example .env
 php artisan key:generate
 
 # Database
+touch database/database.sqlite
 php artisan migrate --seed
 
 # Build assets
@@ -131,11 +172,14 @@ npm run build
 php artisan serve
 ```
 
-### Credenziali Demo
+### 🔑 Credenziali Demo
 ```
-Super Admin: admin@ainstein.com / password
-Demo Tenant: admin@demo.com / demo123
+Demo Tenant Admin:  admin@demo.com / password
+Demo Tenant Member: member@demo.com / password
+Demo Tenant Guest:  guest@demo.com / password
 ```
+
+⚠️ **Cambia le password in produzione!**
 
 ---
 

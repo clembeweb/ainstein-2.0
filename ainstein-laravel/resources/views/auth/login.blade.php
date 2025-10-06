@@ -12,9 +12,15 @@
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full space-y-8">
             <div>
-                <div class="mx-auto h-16 w-16 bg-amber-500 rounded-full flex items-center justify-center">
-                    <i class="fas fa-brain text-white text-2xl"></i>
-                </div>
+                @if(platform_logo_url())
+                    <div class="mx-auto flex justify-center">
+                        <img src="{{ platform_logo_url() }}" alt="{{ platform_name() }}" class="h-16 w-auto">
+                    </div>
+                @else
+                    <div class="mx-auto h-16 w-16 bg-amber-500 rounded-full flex items-center justify-center">
+                        <i class="fas fa-brain text-white text-2xl"></i>
+                    </div>
+                @endif
                 <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
                     Sign in to your account
                 </h2>
@@ -92,6 +98,38 @@
                     </p>
                 </div>
             </form>
+
+            <!-- Social Login -->
+            @if(platform_setting('google_console_client_id') || platform_setting('facebook_app_id'))
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-gray-50 text-gray-500">Or continue with</span>
+                    </div>
+                </div>
+
+                <div class="mt-6 grid grid-cols-2 gap-3">
+                    @if(platform_setting('google_console_client_id'))
+                    <a href="{{ route('social.redirect', 'google') }}"
+                       class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <i class="fab fa-google text-red-500"></i>
+                        <span class="ml-2">Google</span>
+                    </a>
+                    @endif
+
+                    @if(platform_setting('facebook_app_id'))
+                    <a href="{{ route('social.redirect', 'facebook') }}"
+                       class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <i class="fab fa-facebook text-blue-600"></i>
+                        <span class="ml-2">Facebook</span>
+                    </a>
+                    @endif
+                </div>
+            </div>
+            @endif
 
             <!-- Demo Login -->
             <div class="mt-6 border-t pt-6">

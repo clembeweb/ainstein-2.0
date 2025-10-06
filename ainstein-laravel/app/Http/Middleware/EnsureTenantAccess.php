@@ -49,6 +49,7 @@ class EnsureTenantAccess
             Log::warning('User without tenant tried to access tenant resource', [
                 'user_id' => $user->id,
                 'email' => $user->email,
+                'is_super_admin' => $user->is_super_admin ?? false,
                 'route' => $request->route()?->getName(),
                 'url' => $request->url()
             ]);
@@ -60,7 +61,13 @@ class EnsureTenantAccess
                 ], 403);
             }
 
-            return redirect()->route('filament.admin.auth.login')
+            // If super admin, redirect to admin dashboard instead
+            if ($user->is_super_admin) {
+                return redirect()->route('admin.dashboard')
+                    ->with('warning', 'You are accessing the admin area. Tenant features are not available.');
+            }
+
+            return redirect()->route('login')
                 ->with('error', 'Your account is not associated with any tenant. Please contact support.');
         }
 
@@ -79,7 +86,7 @@ class EnsureTenantAccess
                 ], 404);
             }
 
-            return redirect()->route('filament.admin.auth.login')
+            return redirect()->route('admin.login')
                 ->with('error', 'Your tenant account could not be found. Please contact support.');
         }
 
@@ -98,7 +105,7 @@ class EnsureTenantAccess
                 ], 403);
             }
 
-            return redirect()->route('filament.admin.auth.login')
+            return redirect()->route('admin.login')
                 ->with('error', 'Your tenant account is currently inactive. Please contact support.');
         }
 
@@ -116,7 +123,7 @@ class EnsureTenantAccess
                 ], 403);
             }
 
-            return redirect()->route('filament.admin.auth.login')
+            return redirect()->route('admin.login')
                 ->with('error', 'Your account is currently inactive. Please contact support.');
         }
 

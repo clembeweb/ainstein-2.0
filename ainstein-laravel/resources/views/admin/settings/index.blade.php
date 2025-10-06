@@ -15,7 +15,7 @@
             <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center">
                     <h1 class="text-2xl font-bold text-gray-900">Platform Settings</h1>
-                    <a href="{{ route('dashboard') }}" class="text-blue-600 hover:text-blue-700">← Back to Dashboard</a>
+                    <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-700">← Back to Dashboard</a>
                 </div>
             </div>
         </div>

@@ -24,6 +24,11 @@
                     Dashboard
                 </a>
 
+                <a href="{{ route('tenant.campaigns.index') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-amber-50 hover:text-amber-600 {{ request()->routeIs('tenant.campaigns.*') ? 'bg-amber-50 text-amber-600 border-r-2 border-amber-600' : '' }}">
+                    <i class="fas fa-bullhorn mr-3"></i>
+                    Campaigns
+                </a>
+
                 <a href="{{ route('tenant.content.index') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-amber-50 hover:text-amber-600 {{ request()->routeIs('tenant.content.*') ? 'bg-amber-50 text-amber-600 border-r-2 border-amber-600' : '' }}">
                     <i class="fas fa-magic mr-3"></i>
                     Content Generation

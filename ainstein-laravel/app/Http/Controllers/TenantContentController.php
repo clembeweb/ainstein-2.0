@@ -17,6 +17,100 @@ use Illuminate\Support\Facades\Http;
 class TenantContentController extends Controller
 {
     /**
+     * Main Content Generator Hub (with tabs: Pages, Generations, Prompts)
+     */
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        $tenantId = $user->tenant_id;
+        $activeTab = $request->get('tab', 'pages');
+
+        // Pages Tab Data
+        $pagesQuery = \App\Models\Content::where('tenant_id', $tenantId)
+            ->with(['generations']);
+
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $pagesQuery->where(function ($q) use ($search) {
+                $q->where('url', 'like', "%{$search}%")
+                  ->orWhere('keyword', 'like', "%{$search}%")
+                  ->orWhere('content_type', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('category')) {
+            $pagesQuery->where('content_type', $request->get('category'));
+        }
+
+        $pages = $pagesQuery->orderBy('created_at', 'desc')->paginate(15, ['*'], 'pages_page');
+
+        // Generations Tab Data
+        $generationsQuery = ContentGeneration::where('tenant_id', $tenantId)
+            ->with(['content:id,url,keyword']);
+
+        if ($request->filled('status') && $activeTab === 'generations') {
+            $generationsQuery->where('status', $request->get('status'));
+        }
+
+        if ($request->filled('search') && $activeTab === 'generations') {
+            $search = $request->get('search');
+            $generationsQuery->whereHas('content', function ($q) use ($search) {
+                $q->where('url', 'like', "%{$search}%")
+                  ->orWhere('keyword', 'like', "%{$search}%");
+            });
+        }
+
+        $generations = $generationsQuery->orderBy('created_at', 'desc')->paginate(15, ['*'], 'gen_page');
+
+        // Prompts Tab Data
+        $promptsQuery = Prompt::query()
+            ->where(function ($q) use ($tenantId) {
+                $q->where('tenant_id', $tenantId)
+                  ->orWhere('is_system', true);
+            })
+            ->with(['tenant:id,name']);
+
+        if ($request->filled('prompt_search')) {
+            $search = $request->get('prompt_search');
+            $promptsQuery->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('alias', 'like', "%{$search}%");
+            });
+        }
+
+        $prompts = $promptsQuery->orderBy('is_system', 'asc')->orderBy('created_at', 'desc')->paginate(15, ['*'], 'prompts_page');
+
+        // Filter options
+        $statuses = ['active', 'inactive', 'pending', 'archived'];
+        $generationStatuses = ['pending', 'processing', 'completed', 'failed'];
+        $categories = \App\Models\Content::where('tenant_id', $tenantId)
+            ->distinct()
+            ->pluck('content_type')
+            ->filter()
+            ->values();
+        $promptCategories = Prompt::query()
+            ->where(function ($q) use ($tenantId) {
+                $q->where('tenant_id', $tenantId)
+                  ->orWhere('is_system', true);
+            })
+            ->distinct()
+            ->pluck('category')
+            ->filter()
+            ->values();
+
+        return view('tenant.content-generator.index', compact(
+            'activeTab',
+            'pages',
+            'generations',
+            'prompts',
+            'statuses',
+            'generationStatuses',
+            'categories',
+            'promptCategories'
+        ));
+    }
+
+    /**
      * Show the content generation form
      */
     public function create(Request $request)
@@ -362,78 +456,151 @@ class TenantContentController extends Controller
     }
 
     /**
-     * Display a listing of content generations
+     * Show the form for editing the specified content generation
      */
-    public function index(Request $request)
+    public function edit(ContentGeneration $generation)
     {
+        $user = Auth::user();
+
+        // Ensure the generation belongs to the user's tenant
+        if ($generation->tenant_id !== $user->tenant_id) {
+            abort(403, 'Unauthorized access to this content generation');
+        }
+
         try {
-            $user = Auth::user();
-            $tenantId = $user->tenant_id;
+            $generation->load(['content', 'prompt']);
 
-            $query = ContentGeneration::where('tenant_id', $tenantId)
-                ->with(['content', 'prompt']);
+            return view('tenant.content.edit', compact('generation'));
 
-            // Filter by status
-            if ($request->filled('status')) {
-                $query->where('status', $request->get('status'));
+        } catch (\Exception $e) {
+            Log::error('Error loading content generation edit form', [
+                'generation_id' => $generation->id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage()
+            ]);
+
+            return back()->with('error', 'Failed to load edit form. Please try again.');
+        }
+    }
+
+    /**
+     * Update the specified content generation
+     */
+    public function update(Request $request, ContentGeneration $generation)
+    {
+        $user = Auth::user();
+
+        // Ensure the generation belongs to the user's tenant
+        if ($generation->tenant_id !== $user->tenant_id) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Unauthorized'], 403);
             }
+            abort(403, 'Unauthorized access to this content generation');
+        }
 
-            // Filter by page (content)
-            if ($request->filled('page_id')) {
-                $query->where('page_id', $request->get('page_id'));
+        $validator = Validator::make($request->all(), [
+            'generated_content' => 'required|string',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'error' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
             }
+            return back()->withErrors($validator)->withInput();
+        }
 
-            // Search functionality
-            if ($request->filled('search')) {
-                $search = $request->get('search');
-                $query->whereHas('content', function ($q) use ($search) {
-                    $q->where('url', 'like', "%{$search}%")
-                      ->orWhere('keyword', 'like', "%{$search}%");
-                });
-            }
+        try {
+            $generation->update([
+                'generated_content' => $request->generated_content,
+                'notes' => $request->notes,
+            ]);
 
-            // Sorting
-            $sortBy = $request->get('sort_by', 'created_at');
-            $sortOrder = $request->get('sort_order', 'desc');
-            $query->orderBy($sortBy, $sortOrder);
-
-            $generations = $query->paginate($request->get('per_page', 15));
-
-            // Get filter options (use Content instead of Page)
-            $pages = Content::where('tenant_id', $tenantId)->where('status', 'active')->get();
-            $statuses = ['pending', 'processing', 'completed', 'failed'];
+            Log::info('Content generation updated successfully', [
+                'generation_id' => $generation->id,
+                'user_id' => $user->id
+            ]);
 
             if ($request->expectsJson()) {
                 return response()->json([
-                    'data' => $generations->items(),
-                    'meta' => [
-                        'current_page' => $generations->currentPage(),
-                        'last_page' => $generations->lastPage(),
-                        'per_page' => $generations->perPage(),
-                        'total' => $generations->total(),
-                        'from' => $generations->firstItem(),
-                        'to' => $generations->lastItem()
-                    ],
-                    'filters' => [
-                        'pages' => $pages,
-                        'statuses' => $statuses
-                    ]
+                    'message' => 'Content generation updated successfully',
+                    'data' => $generation->fresh()
                 ]);
             }
 
-            return view('tenant.content.index', compact('generations', 'pages', 'statuses'));
+            return redirect()->route('tenant.content.show', $generation->id)
+                ->with('success', 'Content generation updated successfully!');
 
         } catch (\Exception $e) {
-            Log::error('Error fetching content generations', [
+            Log::error('Error updating content generation', [
+                'generation_id' => $generation->id,
                 'user_id' => Auth::id(),
                 'error' => $e->getMessage()
             ]);
 
             if ($request->expectsJson()) {
-                return response()->json(['error' => 'Failed to fetch content generations'], 500);
+                return response()->json(['error' => 'Failed to update content generation'], 500);
             }
 
-            return back()->with('error', 'Failed to load content generations. Please try again.');
+            return back()->with('error', 'Failed to update content generation. Please try again.')->withInput();
+        }
+    }
+
+    /**
+     * Remove the specified content generation from storage
+     */
+    public function destroy(ContentGeneration $generation)
+    {
+        $user = Auth::user();
+
+        // Ensure the generation belongs to the user's tenant
+        if ($generation->tenant_id !== $user->tenant_id) {
+            if (request()->expectsJson()) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+            abort(403, 'Unauthorized access to this content generation');
+        }
+
+        try {
+            // Store info for logging
+            $generationInfo = [
+                'id' => $generation->id,
+                'page_id' => $generation->page_id,
+                'prompt_type' => $generation->prompt_type,
+            ];
+
+            // Delete the generation
+            $generation->delete();
+
+            Log::info('Content generation deleted successfully', [
+                'generation_info' => $generationInfo,
+                'user_id' => $user->id
+            ]);
+
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'message' => 'Content generation deleted successfully'
+                ]);
+            }
+
+            return redirect()->route('tenant.content.index', ['tab' => 'generations'])
+                ->with('success', 'Content generation deleted successfully!');
+
+        } catch (\Exception $e) {
+            Log::error('Error deleting content generation', [
+                'generation_id' => $generation->id,
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage()
+            ]);
+
+            if (request()->expectsJson()) {
+                return response()->json(['error' => 'Failed to delete content generation'], 500);
+            }
+
+            return back()->with('error', 'Failed to delete content generation. Please try again.');
         }
     }
 

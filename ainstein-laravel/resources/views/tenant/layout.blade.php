@@ -15,22 +15,28 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16">
                     <div class="flex items-center">
-                        <div class="flex-shrink-0">
+                        <div class="flex-shrink-0 flex items-center space-x-3">
+                            @if(platform_logo_url())
+                                <img src="{{ platform_logo_url() }}" alt="{{ platform_name() }}" class="h-8 w-auto">
+                            @endif
                             <h1 class="text-xl font-semibold text-gray-900">
-                                {{ auth()->user()->tenant->theme_config['brandName'] ?? 'Ainstein' }}
+                                {{ platform_name() }}
                             </h1>
                         </div>
                         <nav class="hidden md:ml-6 md:flex md:space-x-8">
-                            <a href="{{ route('tenant.dashboard') }}" class="px-3 py-2 text-sm font-medium text-gray-900 hover:text-blue-600 {{ request()->routeIs('tenant.dashboard') ? 'border-b-2 border-blue-600' : '' }}">
+                            <a href="{{ route('tenant.dashboard') }}" class="px-3 py-2 text-sm font-medium {{ request()->routeIs('tenant.dashboard') ? 'text-gray-900 border-b-2 border-blue-600' : 'text-gray-700 hover:text-blue-600' }}">
                                 Dashboard
                             </a>
-                            <a href="{{ route('tenant.pages.index') }}" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 {{ request()->routeIs('tenant.pages.*') ? 'border-b-2 border-blue-600' : '' }}">
+                            <a href="{{ route('tenant.campaigns.index') }}" class="px-3 py-2 text-sm font-medium {{ request()->routeIs('tenant.campaigns.*') ? 'text-gray-900 border-b-2 border-blue-600' : 'text-gray-700 hover:text-blue-600' }}">
+                                Campaigns
+                            </a>
+                            <a href="{{ route('tenant.pages.index') }}" class="px-3 py-2 text-sm font-medium {{ request()->routeIs('tenant.pages.*') ? 'text-gray-900 border-b-2 border-blue-600' : 'text-gray-700 hover:text-blue-600' }}">
                                 Pages
                             </a>
-                            <a href="{{ route('tenant.generations') }}" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 {{ request()->routeIs('tenant.generations') || request()->routeIs('tenant.generation.*') ? 'border-b-2 border-blue-600' : '' }}">
+                            <a href="{{ route('tenant.generations') }}" class="px-3 py-2 text-sm font-medium {{ request()->routeIs('tenant.generations') || request()->routeIs('tenant.generation.*') ? 'text-gray-900 border-b-2 border-blue-600' : 'text-gray-700 hover:text-blue-600' }}">
                                 Content
                             </a>
-                            <a href="{{ route('tenant.api-keys.index') }}" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 {{ request()->routeIs('tenant.api-keys.*') ? 'border-b-2 border-blue-600' : '' }}">
+                            <a href="{{ route('tenant.api-keys.index') }}" class="px-3 py-2 text-sm font-medium {{ request()->routeIs('tenant.api-keys.*') ? 'text-gray-900 border-b-2 border-blue-600' : 'text-gray-700 hover:text-blue-600' }}">
                                 API Keys
                             </a>
                         </nav>

@@ -41,10 +41,22 @@ return [
             'transport' => 'smtp',
             'scheme' => env('MAIL_SCHEME'),
             'url' => env('MAIL_URL'),
-            'host' => env('MAIL_HOST', '127.0.0.1'),
-            'port' => env('MAIL_PORT', 2525),
-            'username' => env('MAIL_USERNAME'),
-            'password' => env('MAIL_PASSWORD'),
+            'host' => function() {
+                $settings = \App\Models\PlatformSetting::first();
+                return $settings?->smtp_host ?: env('MAIL_HOST', '127.0.0.1');
+            },
+            'port' => function() {
+                $settings = \App\Models\PlatformSetting::first();
+                return $settings?->smtp_port ?: env('MAIL_PORT', 2525);
+            },
+            'username' => function() {
+                $settings = \App\Models\PlatformSetting::first();
+                return $settings?->smtp_username ?: env('MAIL_USERNAME');
+            },
+            'password' => function() {
+                $settings = \App\Models\PlatformSetting::first();
+                return $settings?->smtp_password ?: env('MAIL_PASSWORD');
+            },
             'timeout' => null,
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
@@ -111,8 +123,14 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'address' => function() {
+            $settings = \App\Models\PlatformSetting::first();
+            return $settings?->mail_from_address ?: env('MAIL_FROM_ADDRESS', 'hello@example.com');
+        },
+        'name' => function() {
+            $settings = \App\Models\PlatformSetting::first();
+            return $settings?->mail_from_name ?: env('MAIL_FROM_NAME', 'Example');
+        },
     ],
 
 ];

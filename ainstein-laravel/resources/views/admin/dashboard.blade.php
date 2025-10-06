@@ -45,7 +45,7 @@
                 <h3 class="font-bold">🏢 Manage Tenants</h3>
                 <p class="text-sm text-gray-600">View tenants and token usage</p>
             </a>
-            <a href="{{ route('admin.settings') }}" class="block p-4 border rounded hover:bg-gray-50">
+            <a href="{{ route('admin.settings.index') }}" class="block p-4 border rounded hover:bg-gray-50">
                 <h3 class="font-bold">⚙️ Settings</h3>
                 <p class="text-sm text-gray-600">Configure OpenAI API</p>
             </a>

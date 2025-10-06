@@ -38,11 +38,12 @@ return [
     'google' => [
         'client_id' => function() {
             $settings = \App\Models\PlatformSetting::first();
-            return $settings?->google_client_id ?: env('GOOGLE_CLIENT_ID');
+            // Use Google Console OAuth for login (same OAuth can be used for both)
+            return $settings?->google_console_client_id ?: env('GOOGLE_CLIENT_ID');
         },
         'client_secret' => function() {
             $settings = \App\Models\PlatformSetting::first();
-            return $settings?->google_client_secret ?: env('GOOGLE_CLIENT_SECRET');
+            return $settings?->google_console_client_secret ?: env('GOOGLE_CLIENT_SECRET');
         },
         'redirect' => env('APP_URL') . '/auth/google/callback',
     ],
@@ -50,11 +51,13 @@ return [
     'facebook' => [
         'client_id' => function() {
             $settings = \App\Models\PlatformSetting::first();
-            return $settings?->facebook_client_id ?: env('FACEBOOK_CLIENT_ID');
+            // Use facebook_app_id for login
+            return $settings?->facebook_app_id ?: env('FACEBOOK_CLIENT_ID');
         },
         'client_secret' => function() {
             $settings = \App\Models\PlatformSetting::first();
-            return $settings?->facebook_client_secret ?: env('FACEBOOK_CLIENT_SECRET');
+            // Use facebook_app_secret for login
+            return $settings?->facebook_app_secret ?: env('FACEBOOK_CLIENT_SECRET');
         },
         'redirect' => env('APP_URL') . '/auth/facebook/callback',
     ],
@@ -67,6 +70,17 @@ return [
         'model' => function() {
             $settings = \App\Models\PlatformSetting::first();
             return $settings?->openai_model ?: env('OPENAI_MODEL', 'gpt-3.5-turbo');
+        },
+    ],
+
+    'stripe' => [
+        'key' => function() {
+            $settings = \App\Models\PlatformSetting::first();
+            return $settings?->stripe_public_key ?: env('STRIPE_KEY');
+        },
+        'secret' => function() {
+            $settings = \App\Models\PlatformSetting::first();
+            return $settings?->stripe_secret_key ?: env('STRIPE_SECRET');
         },
     ],
 

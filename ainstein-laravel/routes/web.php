@@ -56,8 +56,19 @@ Route::middleware(['auth', \App\Http\Middleware\CheckMaintenanceMode::class, \Ap
     Route::get('/', [TenantDashboardController::class, 'index'])->name('dashboard');
     Route::get('/analytics', [TenantDashboardController::class, 'analytics'])->name('analytics');
 
-    // Pages Management
-    Route::get('/pages', [TenantPageController::class, 'index'])->name('pages.index');
+    // Content Generator (Unified: Pages + Generations + Prompts)
+    Route::get('/content', [TenantContentController::class, 'index'])->name('content.index');
+    Route::get('/content/create', [TenantContentController::class, 'create'])->name('content.create');
+    Route::post('/content', [TenantContentController::class, 'store'])->name('content.store');
+    Route::get('/content/{generation}', [TenantContentController::class, 'show'])->name('content.show');
+    Route::get('/content/{generation}/edit', [TenantContentController::class, 'edit'])->name('content.edit');
+    Route::put('/content/{generation}', [TenantContentController::class, 'update'])->name('content.update');
+    Route::delete('/content/{generation}', [TenantContentController::class, 'destroy'])->name('content.destroy');
+
+    // Pages Management (redirects to unified Content Generator)
+    Route::get('/pages', function () {
+        return redirect()->route('tenant.content.index', ['tab' => 'pages']);
+    })->name('pages.index');
     Route::get('/pages/create', [TenantPageController::class, 'create'])->name('pages.create');
     Route::post('/pages', [TenantPageController::class, 'store'])->name('pages.store');
     Route::get('/pages/{page}', [TenantPageController::class, 'show'])->name('pages.show');
@@ -67,8 +78,10 @@ Route::middleware(['auth', \App\Http\Middleware\CheckMaintenanceMode::class, \Ap
     Route::patch('/pages/bulk-status', [TenantPageController::class, 'bulkUpdateStatus'])->name('pages.bulk-status');
     Route::delete('/pages/bulk-delete', [TenantPageController::class, 'bulkDelete'])->name('pages.bulk-delete');
 
-    // Prompts Management
-    Route::get('/prompts', [TenantPromptController::class, 'index'])->name('prompts.index');
+    // Prompts Management (redirects to unified Content Generator)
+    Route::get('/prompts', function () {
+        return redirect()->route('tenant.content.index', ['tab' => 'prompts']);
+    })->name('prompts.index');
     Route::get('/prompts/create', [TenantPromptController::class, 'create'])->name('prompts.create');
     Route::post('/prompts', [TenantPromptController::class, 'store'])->name('prompts.store');
     Route::get('/prompts/{prompt}', [TenantPromptController::class, 'show'])->name('prompts.show');
@@ -76,12 +89,6 @@ Route::middleware(['auth', \App\Http\Middleware\CheckMaintenanceMode::class, \Ap
     Route::put('/prompts/{prompt}', [TenantPromptController::class, 'update'])->name('prompts.update');
     Route::delete('/prompts/{prompt}', [TenantPromptController::class, 'destroy'])->name('prompts.destroy');
     Route::post('/prompts/{prompt}/duplicate', [TenantPromptController::class, 'duplicate'])->name('prompts.duplicate');
-
-    // Content Generation
-    Route::get('/content/create', [TenantContentController::class, 'create'])->name('content.create');
-    Route::post('/content', [TenantContentController::class, 'store'])->name('content.store');
-    Route::get('/content', [TenantContentController::class, 'index'])->name('content.index');
-    Route::get('/content/{generation}', [TenantContentController::class, 'show'])->name('content.show');
     Route::get('/prompts/{prompt}/details', [TenantContentController::class, 'getPromptDetails'])->name('prompts.details');
 
     // API Keys Management
@@ -114,6 +121,13 @@ Route::middleware(['auth', \App\Http\Middleware\CheckMaintenanceMode::class, \Ap
     // Tool-specific onboarding routes
     Route::post('/onboarding/tool/{tool}/complete', [\App\Http\Controllers\OnboardingController::class, 'completeToolOnboarding'])->name('onboarding.tool.complete');
     Route::post('/onboarding/tool/{tool}/reset', [\App\Http\Controllers\OnboardingController::class, 'resetToolOnboarding'])->name('onboarding.tool.reset');
+
+    // Campaign Generator routes
+    Route::get('/campaigns', [\App\Http\Controllers\Tenant\CampaignGeneratorController::class, 'index'])->name('campaigns.index');
+    Route::get('/campaigns/create', [\App\Http\Controllers\Tenant\CampaignGeneratorController::class, 'create'])->name('campaigns.create');
+    Route::post('/campaigns', [\App\Http\Controllers\Tenant\CampaignGeneratorController::class, 'store'])->name('campaigns.store');
+    Route::get('/campaigns/{id}', [\App\Http\Controllers\Tenant\CampaignGeneratorController::class, 'show'])->name('campaigns.show');
+    Route::delete('/campaigns/{id}', [\App\Http\Controllers\Tenant\CampaignGeneratorController::class, 'destroy'])->name('campaigns.destroy');
 });
 
 // API Documentation

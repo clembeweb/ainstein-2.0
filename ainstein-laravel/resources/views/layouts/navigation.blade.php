@@ -15,16 +15,12 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    <x-nav-link href="{{ route('tenant.pages.index') }}" :active="request()->routeIs('tenant.pages.*')">
-                        {{ __('Pages') }}
+                    <x-nav-link href="{{ route('tenant.content.index') }}" :active="request()->routeIs('tenant.content.*') || request()->routeIs('tenant.pages.*') || request()->routeIs('tenant.prompts.*')">
+                        {{ __('Content Generator') }}
                     </x-nav-link>
 
-                    <x-nav-link href="{{ route('tenant.prompts.index') }}" :active="request()->routeIs('tenant.prompts.*')">
-                        {{ __('Prompts') }}
-                    </x-nav-link>
-
-                    <x-nav-link href="{{ route('tenant.content.index') }}" :active="request()->routeIs('tenant.content.*')">
-                        {{ __('Content Generation') }}
+                    <x-nav-link href="{{ route('tenant.campaigns.index') }}" :active="request()->routeIs('tenant.campaigns.*')">
+                        {{ __('Campaigns') }}
                     </x-nav-link>
 
                     <x-nav-link href="{{ route('tenant.api-keys.index') }}" :active="request()->routeIs('tenant.api-keys.*')">
@@ -102,16 +98,12 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link href="{{ route('tenant.pages.index') }}" :active="request()->routeIs('tenant.pages.*')">
-                {{ __('Pages') }}
+            <x-responsive-nav-link href="{{ route('tenant.content.index') }}" :active="request()->routeIs('tenant.content.*') || request()->routeIs('tenant.pages.*') || request()->routeIs('tenant.prompts.*')">
+                {{ __('Content Generator') }}
             </x-responsive-nav-link>
 
-            <x-responsive-nav-link href="{{ route('tenant.prompts.index') }}" :active="request()->routeIs('tenant.prompts.*')">
-                {{ __('Prompts') }}
-            </x-responsive-nav-link>
-
-            <x-responsive-nav-link href="{{ route('tenant.content.index') }}" :active="request()->routeIs('tenant.content.*')">
-                {{ __('Content Generation') }}
+            <x-responsive-nav-link href="{{ route('tenant.campaigns.index') }}" :active="request()->routeIs('tenant.campaigns.*')">
+                {{ __('Campaigns') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link href="{{ route('tenant.api-keys.index') }}" :active="request()->routeIs('tenant.api-keys.*')">

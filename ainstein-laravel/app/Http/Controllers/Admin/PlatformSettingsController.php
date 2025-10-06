@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\PlatformSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class PlatformSettingsController extends Controller
 {
@@ -180,22 +181,19 @@ class PlatformSettingsController extends Controller
         // Store original logo
         $logoPath = $request->file('logo')->store('logos', 'public');
 
+        // Initialize ImageManager with GD driver
+        $manager = new ImageManager(new Driver());
+
         // Create small version (64x64 for favicon/navbar)
-        $image = Image::make(Storage::disk('public')->path($logoPath));
-        $image->resize(64, 64, function ($constraint) {
-            $constraint->aspectRatio();
-            $constraint->upsize();
-        });
+        $image = $manager->read(Storage::disk('public')->path($logoPath));
+        $image->scale(width: 64);
 
         $smallPath = 'logos/small_' . basename($logoPath);
         $image->save(Storage::disk('public')->path($smallPath));
 
         // Create favicon (32x32)
-        $favicon = Image::make(Storage::disk('public')->path($logoPath));
-        $favicon->resize(32, 32, function ($constraint) {
-            $constraint->aspectRatio();
-            $constraint->upsize();
-        });
+        $favicon = $manager->read(Storage::disk('public')->path($logoPath));
+        $favicon->scale(width: 32);
 
         $faviconPath = 'logos/favicon_' . basename($logoPath);
         $favicon->save(Storage::disk('public')->path($faviconPath));

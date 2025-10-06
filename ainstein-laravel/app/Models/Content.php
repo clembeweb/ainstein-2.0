@@ -55,7 +55,7 @@ class Content extends Model
      */
     public function generations(): HasMany
     {
-        return $this->hasMany(ContentGeneration::class, 'content_id');
+        return $this->hasMany(ContentGeneration::class, 'page_id');
     }
 
     /**

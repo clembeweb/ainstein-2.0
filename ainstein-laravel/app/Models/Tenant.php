@@ -114,6 +114,11 @@ class Tenant extends Model
         return $this->hasMany(Content::class);
     }
 
+    public function advCampaigns(): HasMany
+    {
+        return $this->hasMany(AdvCampaign::class);
+    }
+
     // Scopes
     public function scopeActive($query)
     {

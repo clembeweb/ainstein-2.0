@@ -178,7 +178,7 @@ class AdminController extends Controller
         $this->updateEnvFile('OPENAI_API_KEY', $validated['openai_api_key']);
         $this->updateEnvFile('OPENAI_MODEL', $validated['openai_model']);
 
-        return redirect()->route('admin.settings')->with('success', 'Settings updated successfully');
+        return redirect()->route('admin.settings.index')->with('success', 'Settings updated successfully');
     }
 
     protected function updateEnvFile($key, $value)
