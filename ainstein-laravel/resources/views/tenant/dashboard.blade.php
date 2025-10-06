@@ -209,6 +209,75 @@
                         @endif
                     </div>
                 </div>
+
+                <!-- Recent Content Generations -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-6">
+                    <div class="card-header flex items-center justify-between">
+                        <h3 class="text-lg font-medium text-gray-900">Recent Content Generations</h3>
+                        <a href="{{ route('tenant.content.create') }}" class="btn-primary text-sm">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            GENERATE CONTENT
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        @if($recentGenerations && $recentGenerations->count() > 0)
+                            <div class="space-y-3">
+                                @foreach($recentGenerations as $generation)
+                                    <div class="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-3">
+                                                <span class="px-2 py-1 text-xs font-semibold rounded-full
+                                                    @if($generation->status === 'completed') bg-green-100 text-green-800
+                                                    @elseif($generation->status === 'processing') bg-yellow-100 text-yellow-800
+                                                    @elseif($generation->status === 'failed') bg-red-100 text-red-800
+                                                    @else bg-gray-100 text-gray-800 @endif">
+                                                    {{ ucfirst($generation->status) }}
+                                                </span>
+                                                <span class="text-sm text-gray-600">{{ $generation->created_at->format('M j, Y g:i A') }}</span>
+                                                @if($generation->status === 'completed' && $generation->tokens_used)
+                                                    <span class="text-xs text-gray-500">{{ $generation->tokens_used }} tokens</span>
+                                                @endif
+                                            </div>
+                                            @if($generation->status === 'completed' && $generation->generated_content)
+                                                <p class="text-sm text-gray-700 mt-2 line-clamp-2">
+                                                    {{ Str::limit($generation->generated_content, 150) }}
+                                                </p>
+                                            @elseif($generation->status === 'failed' && $generation->error_message)
+                                                <p class="text-sm text-red-600 mt-2">{{ Str::limit($generation->error_message, 100) }}</p>
+                                            @endif
+                                        </div>
+                                        <a href="{{ route('tenant.content.show', $generation) }}" class="text-blue-600 hover:text-blue-900 text-sm font-medium ml-4">
+                                            View
+                                        </a>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <div class="mt-4">
+                                <a href="{{ route('tenant.content.index') }}" class="text-blue-600 hover:text-blue-900 text-sm font-medium">
+                                    View all generations →
+                                </a>
+                            </div>
+                        @else
+                            <div class="text-center py-8">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900">No content generations yet</h3>
+                                <p class="mt-1 text-sm text-gray-500">Start generating AI-powered content for your pages.</p>
+                                <div class="mt-6">
+                                    <a href="{{ route('tenant.content.create') }}" class="btn-primary">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                        </svg>
+                                        Generate Content
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
             </div>
 
             <!-- Sidebar -->

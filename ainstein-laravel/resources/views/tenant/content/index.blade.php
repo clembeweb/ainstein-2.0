@@ -53,7 +53,7 @@
                             <option value="">All Pages</option>
                             @foreach($pages as $page)
                                 <option value="{{ $page->id }}" {{ request('page_id') == $page->id ? 'selected' : '' }}>
-                                    {{ $page->url_path }}
+                                    {{ $page->url }}
                                 </option>
                             @endforeach
                         </select>
@@ -99,10 +99,10 @@
                                         <div class="flex items-center">
                                             <div>
                                                 <div class="text-sm font-medium text-gray-900">
-                                                    {{ $generation->page->url_path }}
+                                                    {{ $generation->content->url }}
                                                 </div>
                                                 <div class="text-sm text-gray-500">
-                                                    {{ $generation->page->keyword }}
+                                                    {{ $generation->content->keyword }}
                                                 </div>
                                             </div>
                                         </div>

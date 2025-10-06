@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Page;
+use App\Models\Content;
+use App\Models\Page; // Keep for backward compatibility
 use App\Models\Prompt;
 use App\Models\ContentGeneration;
 use App\Jobs\ProcessContentGeneration;
@@ -23,10 +24,10 @@ class TenantContentController extends Controller
         $user = Auth::user();
         $tenantId = $user->tenant_id;
 
-        // Get user's pages
-        $pages = Page::where('tenant_id', $tenantId)
+        // Get user's contents (unified content table)
+        $pages = \App\Models\Content::where('tenant_id', $tenantId)
             ->where('status', 'active')
-            ->orderBy('url_path')
+            ->orderBy('url')
             ->get();
 
         // Get available prompts (user's prompts + system prompts)
@@ -37,14 +38,14 @@ class TenantContentController extends Controller
             })
             ->where('is_active', true)
             ->orderBy('is_system', 'asc')
-            ->orderBy('name')
+            ->orderBy('alias')
             ->get();
 
         // Pre-select page if provided
         $selectedPageId = $request->get('page_id');
         $selectedPage = null;
         if ($selectedPageId) {
-            $selectedPage = Page::where('tenant_id', $tenantId)
+            $selectedPage = \App\Models\Content::where('tenant_id', $tenantId)
                 ->where('id', $selectedPageId)
                 ->first();
         }
@@ -53,16 +54,17 @@ class TenantContentController extends Controller
     }
 
     /**
-     * Generate content
+     * Generate content (with sync/async mode support)
      */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'page_id' => 'required|exists:pages,id',
+            'page_id' => 'required|exists:contents,id',
             'prompt_id' => 'required|exists:prompts,id',
             'variables' => 'nullable|array',
             'variables.*' => 'string|max:1000',
             'additional_instructions' => 'nullable|string|max:2000',
+            'execution_mode' => 'nullable|in:sync,async',
         ]);
 
         if ($validator->fails()) {
@@ -75,12 +77,26 @@ class TenantContentController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
+        $executionMode = $request->get('execution_mode', 'async');
+
+        if ($executionMode === 'sync') {
+            return $this->generateSync($request);
+        } else {
+            return $this->generateAsync($request);
+        }
+    }
+
+    /**
+     * Async generation (background queue)
+     */
+    protected function generateAsync(Request $request)
+    {
         try {
             $user = Auth::user();
             $tenantId = $user->tenant_id;
 
             // Verify page belongs to tenant
-            $page = Page::where('tenant_id', $tenantId)
+            $page = Content::where('tenant_id', $tenantId)
                 ->where('id', $request->page_id)
                 ->first();
 
@@ -102,10 +118,10 @@ class TenantContentController extends Controller
                 return back()->with('error', 'Prompt not found or access denied.');
             }
 
-            // Determine prompt type based on prompt category or name
+            // Determine prompt type
             $promptType = $this->determinePromptType($prompt);
 
-            // Create content generation record
+            // Create generation record
             $generation = ContentGeneration::create([
                 'tenant_id' => $tenantId,
                 'page_id' => $page->id,
@@ -115,16 +131,15 @@ class TenantContentController extends Controller
                 'variables' => $request->variables ?? [],
                 'additional_instructions' => $request->additional_instructions,
                 'status' => 'pending',
+                'execution_mode' => 'async',
                 'created_by' => $user->id,
-                'ai_model' => 'gpt-3.5-turbo', // Set default model
+                'ai_model' => 'gpt-4o',
             ]);
 
-            Log::info('Content generation created', [
+            Log::info('Async content generation created', [
                 'generation_id' => $generation->id,
                 'page_id' => $page->id,
-                'prompt_id' => $prompt->id,
-                'tenant_id' => $tenantId,
-                'user_id' => $user->id
+                'tenant_id' => $tenantId
             ]);
 
             // Dispatch job for background processing
@@ -132,27 +147,177 @@ class TenantContentController extends Controller
 
             if ($request->expectsJson()) {
                 return response()->json([
-                    'message' => 'Content generation started successfully',
-                    'data' => $generation->load(['page', 'prompt'])
+                    'message' => 'Content generation started in background',
+                    'data' => $generation->load(['content', 'prompt'])
                 ], 201);
             }
 
             return redirect()->route('tenant.content.show', $generation->id)
-                ->with('success', 'Content generation started successfully!');
+                ->with('success', 'Content generation started in background!');
 
         } catch (\Exception $e) {
-            Log::error('Error creating content generation', [
+            Log::error('Error creating async generation', [
                 'user_id' => Auth::id(),
-                'data' => $request->all(),
                 'error' => $e->getMessage()
             ]);
 
             if ($request->expectsJson()) {
-                return response()->json(['error' => 'Failed to start content generation'], 500);
+                return response()->json(['error' => 'Failed to start generation'], 500);
             }
 
-            return back()->with('error', 'Failed to start content generation. Please try again.')->withInput();
+            return back()->with('error', 'Failed to start generation. Please try again.')->withInput();
         }
+    }
+
+    /**
+     * Sync generation (immediate)
+     */
+    protected function generateSync(Request $request)
+    {
+        set_time_limit(120); // Allow up to 2 minutes for sync generation
+
+        $user = Auth::user();
+        $tenantId = $user->tenant_id;
+        $generation = null;
+
+        try {
+            // Verify page
+            $page = Content::where('tenant_id', $tenantId)
+                ->findOrFail($request->page_id);
+
+            // Verify prompt
+            $prompt = Prompt::where(function ($q) use ($tenantId) {
+                    $q->where('tenant_id', $tenantId)->orWhere('is_system', true);
+                })
+                ->where('is_active', true)
+                ->findOrFail($request->prompt_id);
+
+            // Create generation record with 'processing' status
+            $generation = ContentGeneration::create([
+                'tenant_id' => $tenantId,
+                'page_id' => $page->id,
+                'prompt_id' => $prompt->id,
+                'prompt_type' => $this->determinePromptType($prompt),
+                'prompt_template' => $prompt->template,
+                'variables' => $request->variables ?? [],
+                'additional_instructions' => $request->additional_instructions,
+                'status' => 'processing',
+                'execution_mode' => 'sync',
+                'created_by' => $user->id,
+                'ai_model' => 'gpt-4o',
+                'started_at' => now()
+            ]);
+
+            // Build final prompt
+            $finalPrompt = $this->buildPrompt($generation, $prompt, $page);
+
+            Log::info('Sync generation started', [
+                'generation_id' => $generation->id,
+                'tenant_id' => $tenantId
+            ]);
+
+            // Call OpenAI service IMMEDIATELY (blocks here)
+            $openAiService = app(\App\Services\OpenAiService::class);
+            $startTime = microtime(true);
+            $generatedContent = $openAiService->generateSimpleContent($finalPrompt);
+            $endTime = microtime(true);
+
+            $generationTimeMs = (int) (($endTime - $startTime) * 1000);
+            $tokensUsed = $this->estimateTokens($finalPrompt . $generatedContent);
+
+            // Update generation with results
+            $generation->update([
+                'status' => 'completed',
+                'generated_content' => $generatedContent,
+                'tokens_used' => $tokensUsed,
+                'generation_time_ms' => $generationTimeMs,
+                'completed_at' => now()
+            ]);
+
+            // Update tenant token usage
+            $generation->tenant->increment('tokens_used_current', $tokensUsed);
+
+            Log::info('Sync generation completed', [
+                'generation_id' => $generation->id,
+                'time_ms' => $generationTimeMs,
+                'tokens' => $tokensUsed
+            ]);
+
+            // Return response
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'generation' => $generation->load(['content', 'prompt']),
+                    'redirect_url' => route('tenant.content.show', $generation->id)
+                ]);
+            }
+
+            return redirect()->route('tenant.content.show', $generation->id)
+                ->with('success', "Content generated successfully in " . number_format($generationTimeMs / 1000, 2) . " seconds!");
+
+        } catch (\Exception $e) {
+            Log::error('Sync generation failed', [
+                'error' => $e->getMessage(),
+                'generation_id' => $generation->id ?? null
+            ]);
+
+            if (isset($generation)) {
+                $generation->update([
+                    'status' => 'failed',
+                    'error_message' => $e->getMessage(),
+                    'completed_at' => now()
+                ]);
+            }
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Generation failed: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return back()
+                ->with('error', 'Generation failed: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Build final prompt from template + variables
+     */
+    protected function buildPrompt($generation, $prompt, $page): string
+    {
+        $finalPrompt = $prompt->template;
+
+        // Replace variables
+        if ($generation->variables) {
+            foreach ($generation->variables as $key => $value) {
+                $finalPrompt = str_replace('{{' . $key . '}}', $value, $finalPrompt);
+                $finalPrompt = str_replace('{' . $key . '}', $value, $finalPrompt);
+            }
+        }
+
+        // Add page context
+        $finalPrompt .= "\n\nPage Context:\n";
+        $finalPrompt .= "URL: " . $page->url . "\n";
+        $finalPrompt .= "Keyword: " . $page->keyword . "\n";
+
+        // Add additional instructions
+        if ($generation->additional_instructions) {
+            $finalPrompt .= "\n\nAdditional Instructions:\n";
+            $finalPrompt .= $generation->additional_instructions;
+        }
+
+        return $finalPrompt;
+    }
+
+    /**
+     * Estimate token usage (rough calculation)
+     */
+    protected function estimateTokens(string $text): int
+    {
+        // Rough estimate: 1 token ≈ 4 characters
+        return (int) ceil(strlen($text) / 4);
     }
 
     /**
@@ -171,7 +336,7 @@ class TenantContentController extends Controller
         }
 
         try {
-            $generation->load(['page', 'prompt', 'tenant']);
+            $generation->load(['content', 'prompt', 'tenant']);
 
             if (request()->expectsJson()) {
                 return response()->json([
@@ -206,14 +371,14 @@ class TenantContentController extends Controller
             $tenantId = $user->tenant_id;
 
             $query = ContentGeneration::where('tenant_id', $tenantId)
-                ->with(['page', 'prompt']);
+                ->with(['content', 'prompt']);
 
             // Filter by status
             if ($request->filled('status')) {
                 $query->where('status', $request->get('status'));
             }
 
-            // Filter by page
+            // Filter by page (content)
             if ($request->filled('page_id')) {
                 $query->where('page_id', $request->get('page_id'));
             }
@@ -221,8 +386,8 @@ class TenantContentController extends Controller
             // Search functionality
             if ($request->filled('search')) {
                 $search = $request->get('search');
-                $query->whereHas('page', function ($q) use ($search) {
-                    $q->where('url_path', 'like', "%{$search}%")
+                $query->whereHas('content', function ($q) use ($search) {
+                    $q->where('url', 'like', "%{$search}%")
                       ->orWhere('keyword', 'like', "%{$search}%");
                 });
             }
@@ -234,8 +399,8 @@ class TenantContentController extends Controller
 
             $generations = $query->paginate($request->get('per_page', 15));
 
-            // Get filter options
-            $pages = Page::where('tenant_id', $tenantId)->get();
+            // Get filter options (use Content instead of Page)
+            $pages = Content::where('tenant_id', $tenantId)->where('status', 'active')->get();
             $statuses = ['pending', 'processing', 'completed', 'failed'];
 
             if ($request->expectsJson()) {

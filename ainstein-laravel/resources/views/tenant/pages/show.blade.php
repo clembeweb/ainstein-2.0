@@ -158,12 +158,12 @@
                                                 @endif
                                             </div>
                                             <div class="flex items-center space-x-2">
-                                                <a href="{{ route('tenant.generation.show', $generation) }}" class="text-blue-600 hover:text-blue-900 text-sm">View</a>
+                                                <a href="{{ route('tenant.content.show', $generation) }}" class="text-blue-600 hover:text-blue-900 text-sm">View</a>
                                             </div>
                                         </div>
-                                        @if($generation->content && $generation->status === 'completed')
+                                        @if($generation->generated_content && $generation->status === 'completed')
                                             <div class="mt-2">
-                                                <p class="text-sm text-gray-600 line-clamp-3">{{ Str::limit(strip_tags($generation->content), 200) }}</p>
+                                                <p class="text-sm text-gray-600 line-clamp-3">{{ Str::limit(strip_tags($generation->generated_content), 200) }}</p>
                                             </div>
                                         @endif
                                         @if($generation->error_message && $generation->status === 'failed')

@@ -103,7 +103,7 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                                 @foreach($prompt->variables as $variable)
                                     <div class="inline-flex items-center px-3 py-2 bg-blue-50 border border-blue-200 rounded-md">
-                                        <span class="text-sm font-mono text-blue-900">{{{{ $variable }}}}</span>
+                                        <span class="text-sm font-mono text-blue-900">@verbatim{{@endverbatim{{ $variable }}@verbatim}}@endverbatim</span>
                                     </div>
                                 @endforeach
                             </div>

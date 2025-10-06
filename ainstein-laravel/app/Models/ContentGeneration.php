@@ -30,12 +30,17 @@ class ContentGeneration extends Model
         'page_id',
         'tenant_id',
         'created_by',
+        'execution_mode',
+        'started_at',
+        'generation_time_ms',
     ];
 
     protected $casts = [
         'tokens_used' => 'integer',
+        'generation_time_ms' => 'integer',
         'published_at' => 'datetime',
         'completed_at' => 'datetime',
+        'started_at' => 'datetime',
         'variables' => 'array',
     ];
 
@@ -75,5 +80,27 @@ class ContentGeneration extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    // Scopes
+    public function scopeSync($query)
+    {
+        return $query->where('execution_mode', 'sync');
+    }
+
+    public function scopeAsync($query)
+    {
+        return $query->where('execution_mode', 'async');
+    }
+
+    // Helper methods
+    public function isSync(): bool
+    {
+        return $this->execution_mode === 'sync';
+    }
+
+    public function isAsync(): bool
+    {
+        return $this->execution_mode === 'async';
     }
 }

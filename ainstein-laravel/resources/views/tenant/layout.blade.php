@@ -24,13 +24,13 @@
                             <a href="{{ route('tenant.dashboard') }}" class="px-3 py-2 text-sm font-medium text-gray-900 hover:text-blue-600 {{ request()->routeIs('tenant.dashboard') ? 'border-b-2 border-blue-600' : '' }}">
                                 Dashboard
                             </a>
-                            <a href="{{ route('tenant.pages') }}" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 {{ request()->routeIs('tenant.pages') ? 'border-b-2 border-blue-600' : '' }}">
+                            <a href="{{ route('tenant.pages.index') }}" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 {{ request()->routeIs('tenant.pages.*') ? 'border-b-2 border-blue-600' : '' }}">
                                 Pages
                             </a>
-                            <a href="{{ route('tenant.generations') }}" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 {{ request()->routeIs('tenant.generations') ? 'border-b-2 border-blue-600' : '' }}">
+                            <a href="{{ route('tenant.generations') }}" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 {{ request()->routeIs('tenant.generations') || request()->routeIs('tenant.generation.*') ? 'border-b-2 border-blue-600' : '' }}">
                                 Content
                             </a>
-                            <a href="{{ route('tenant.api-keys') }}" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 {{ request()->routeIs('tenant.api-keys') ? 'border-b-2 border-blue-600' : '' }}">
+                            <a href="{{ route('tenant.api-keys.index') }}" class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 {{ request()->routeIs('tenant.api-keys.*') ? 'border-b-2 border-blue-600' : '' }}">
                                 API Keys
                             </a>
                         </nav>

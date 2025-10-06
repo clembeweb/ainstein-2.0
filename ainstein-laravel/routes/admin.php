@@ -31,7 +31,27 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::put('/tenants/{tenant}', [AdminController::class, 'updateTenant'])->name('tenants.update');
     Route::post('/tenants/{tenant}/reset-tokens', [AdminController::class, 'resetTokens'])->name('tenants.reset-tokens');
 
-    // Settings
-    Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
-    Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
+    // Platform Settings
+    Route::get('/settings', [\App\Http\Controllers\Admin\PlatformSettingsController::class, 'index'])->name('settings.index');
+
+    // OAuth Settings
+    Route::post('/settings/oauth', [\App\Http\Controllers\Admin\PlatformSettingsController::class, 'updateOAuth'])->name('settings.oauth.update');
+
+    // OpenAI Settings
+    Route::post('/settings/openai', [\App\Http\Controllers\Admin\PlatformSettingsController::class, 'updateOpenAI'])->name('settings.openai.update');
+    Route::post('/settings/openai/test', [\App\Http\Controllers\Admin\PlatformSettingsController::class, 'testOpenAI'])->name('settings.openai.test');
+
+    // Stripe Settings
+    Route::post('/settings/stripe', [\App\Http\Controllers\Admin\PlatformSettingsController::class, 'updateStripe'])->name('settings.stripe.update');
+    Route::post('/settings/stripe/test', [\App\Http\Controllers\Admin\PlatformSettingsController::class, 'testStripe'])->name('settings.stripe.test');
+
+    // Email Settings
+    Route::post('/settings/email', [\App\Http\Controllers\Admin\PlatformSettingsController::class, 'updateEmail'])->name('settings.email.update');
+
+    // Advanced Settings
+    Route::post('/settings/advanced', [\App\Http\Controllers\Admin\PlatformSettingsController::class, 'updateAdvanced'])->name('settings.advanced.update');
+
+    // Logo Upload
+    Route::post('/settings/logo', [\App\Http\Controllers\Admin\PlatformSettingsController::class, 'uploadLogo'])->name('settings.logo.upload');
+    Route::delete('/settings/logo', [\App\Http\Controllers\Admin\PlatformSettingsController::class, 'deleteLogo'])->name('settings.logo.delete');
 });

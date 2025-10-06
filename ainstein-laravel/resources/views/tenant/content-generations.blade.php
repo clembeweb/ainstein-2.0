@@ -134,7 +134,7 @@
                             </td>
                             <td class="px-6 py-4 text-right text-sm font-medium">
                                 <div class="flex items-center justify-end space-x-2">
-                                    <a href="{{ route('tenant.generation.show', $generation) }}" class="text-blue-600 hover:text-blue-700" title="View Details">
+                                    <a href="{{ route('tenant.content.show', $generation) }}" class="text-blue-600 hover:text-blue-700" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     @if($generation->status === 'completed' && $generation->generated_content)

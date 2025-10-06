@@ -19,14 +19,19 @@ class OpenAiService
 
     public function __construct()
     {
-        $settings = PlatformSetting::first();
+        // Use PlatformSetting::get() with caching
+        $this->apiKey = PlatformSetting::get('openai_api_key');
 
-        if (!$settings || !$settings->openai_api_key) {
-            throw new Exception('OpenAI API key not configured in platform settings');
+        if (!$this->apiKey) {
+            // Fallback to .env if not configured in database
+            $this->apiKey = env('OPENAI_API_KEY');
         }
 
-        $this->apiKey = $settings->openai_api_key;
-        $this->model = $settings->openai_model ?? 'gpt-4o';
+        if (!$this->apiKey) {
+            throw new Exception('OpenAI API key not configured in platform settings or .env');
+        }
+
+        $this->model = PlatformSetting::get('openai_default_model', 'gpt-4o-mini');
 
         // If API key is fake/test, use MockOpenAiService
         if (!$this->isRealApiKey($this->apiKey)) {
@@ -75,6 +80,10 @@ class OpenAiService
             // Replace variables in prompt template
             $processedPrompt = $this->processPromptVariables($prompt, $variables);
 
+            // Get settings from database with fallback to defaults
+            $maxTokens = PlatformSetting::get('openai_max_tokens', 2000);
+            $temperature = PlatformSetting::get('openai_temperature', 0.7);
+
             $response = $this->client->chat()->create([
                 'model' => $model ?? $this->model,
                 'messages' => [
@@ -87,8 +96,8 @@ class OpenAiService
                         'content' => $processedPrompt
                     ]
                 ],
-                'max_tokens' => 2000,
-                'temperature' => 0.7,
+                'max_tokens' => $maxTokens,
+                'temperature' => $temperature,
             ]);
 
             $content = $response->choices[0]->message->content;
@@ -273,13 +282,17 @@ class OpenAiService
     public function generateSimpleContent(string $prompt): string
     {
         try {
+            // Get settings from database with fallback to defaults
+            $maxTokens = PlatformSetting::get('openai_max_tokens', 2000);
+            $temperature = PlatformSetting::get('openai_temperature', 0.7);
+
             $response = $this->client->chat()->create([
                 'model' => $this->model,
                 'messages' => [
                     ['role' => 'user', 'content' => $prompt]
                 ],
-                'max_tokens' => 2000,
-                'temperature' => 0.7,
+                'max_tokens' => $maxTokens,
+                'temperature' => $temperature,
             ]);
 
             return $response->choices[0]->message->content ?? 'Failed to generate content';

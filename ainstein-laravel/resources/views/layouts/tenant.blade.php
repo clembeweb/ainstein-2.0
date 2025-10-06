@@ -24,22 +24,17 @@
                     Dashboard
                 </a>
 
-                <a href="{{ route('tenant.pages') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-amber-50 hover:text-amber-600 {{ request()->routeIs('tenant.pages') ? 'bg-amber-50 text-amber-600 border-r-2 border-amber-600' : '' }}">
-                    <i class="fas fa-file-alt mr-3"></i>
-                    Pages
+                <a href="{{ route('tenant.content.index') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-amber-50 hover:text-amber-600 {{ request()->routeIs('tenant.content.*') ? 'bg-amber-50 text-amber-600 border-r-2 border-amber-600' : '' }}">
+                    <i class="fas fa-magic mr-3"></i>
+                    Content Generation
                 </a>
 
-                <a href="{{ route('tenant.prompts') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-amber-50 hover:text-amber-600 {{ request()->routeIs('tenant.prompts') ? 'bg-amber-50 text-amber-600 border-r-2 border-amber-600' : '' }}">
+                <a href="{{ route('tenant.prompts.index') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-amber-50 hover:text-amber-600 {{ request()->routeIs('tenant.prompts.*') ? 'bg-amber-50 text-amber-600 border-r-2 border-amber-600' : '' }}">
                     <i class="fas fa-edit mr-3"></i>
                     Prompts
                 </a>
 
-                <a href="{{ route('tenant.generations') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-amber-50 hover:text-amber-600 {{ request()->routeIs('tenant.generations') ? 'bg-amber-50 text-amber-600 border-r-2 border-amber-600' : '' }}">
-                    <i class="fas fa-magic mr-3"></i>
-                    Content Generations
-                </a>
-
-                <a href="{{ route('tenant.api-keys') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-amber-50 hover:text-amber-600 {{ request()->routeIs('tenant.api-keys') ? 'bg-amber-50 text-amber-600 border-r-2 border-amber-600' : '' }}">
+                <a href="{{ route('tenant.api-keys.index') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-amber-50 hover:text-amber-600 {{ request()->routeIs('tenant.api-keys.*') ? 'bg-amber-50 text-amber-600 border-r-2 border-amber-600' : '' }}">
                     <i class="fas fa-key mr-3"></i>
                     API Keys
                 </a>

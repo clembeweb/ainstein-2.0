@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(cat:*)",
+      "Bash(git add:*)",
+      "Bash(git reset:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\n📚 Complete Documentation System + Admin Settings Centralization Spec\n\n## Documentation Updates (P0 CRITICAL)\n\n### New Specification Documents (4)\n- ✅ ADMIN-SETTINGS-CENTRALIZATION.md (P0 - Next task)\n  - OAuth integrations (Google Ads, Facebook, GSC)\n  - Logo upload feature with auto-resize\n  - OpenAI/Stripe/Email configuration via UI\n  - Zero hardcoded values strategy\n  - 6-phase implementation checklist (8-12h)\n\n- ✅ ARCHITECTURE.md (600+ lines)\n  - Enterprise-grade system architecture\n  - Multi-tenancy, Security, Database, Queue\n  - GDPR/SOC 2 compliance\n  - Disaster Recovery, Monitoring\n\n- ✅ DEPLOYMENT-COMPATIBILITY.md (500+ lines)\n  - Multi-hosting support (SiteGround/Forge/AWS/Docker)\n  - Deployment scripts per provider\n  - HostingDetector service\n  - Environment-specific optimizations\n\n- ✅ ADMIN-COST-ANALYTICS.md\n  - OpenAI cost tracking dashboard\n  - Chart.js visualization\n  - CSV export functionality\n\n### Organization System\n- ✅ START-HERE.md - Entry point with \"proseguiamo\" command\n- ✅ .project-status - Machine-readable project state\n- ✅ READY-TO-DEVELOP.md - Next task quick reference\n- ✅ SYNC-*.md files - Cross-chat synchronization system\n- ✅ DOCUMENTATION-UPDATE-LOG.md - Change tracking\n\n### Documentation Structure\n- ✅ docs/01-project-overview/ (10 files)\n  - Roadmap, Architecture, Deployment, Admin specs\n- ✅ docs/02-tools-refactoring/ (9 files)\n  - 6 tool specifications, refactoring plan\n- ✅ docs/03-design-system/ (2 files)\n  - UI/UX design system, Onboarding tours\n- ✅ docs/04-archive/ (2 files)\n  - Historical documentation\n\n### Database Migrations\n- ✅ add_execution_mode_to_content_generations\n- ✅ fix_content_generations_foreign_key_to_contents\n\n## Impact\n- 📊 Documentation: +2,500 lines (10,500 total)\n- 🎯 Next task clearly defined: Admin Settings Centralization\n- ⚡ Resume time: ~3 minutes (from 15+ minutes)\n- 📁 19 MD files organized in logical structure\n- 🚀 \"proseguiamo\" command fully configured\n\n## Next Actions\n1. Implement Admin Settings Centralization (P0 CRITICAL)\n2. Plan Tool Architecture (SEO/ADV/Copy)\n3. Implement first tool (SEO Content Generator)\n\n🤖 Generated with Claude Code\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)",
+      "Bash(php artisan make:migration:*)",
+      "Bash(php artisan:*)",
+      "Bash(composer:*)",
+      "Bash(php:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
