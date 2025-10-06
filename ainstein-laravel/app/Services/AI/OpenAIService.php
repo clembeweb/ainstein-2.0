@@ -388,6 +388,22 @@ class OpenAIService
         $lastMessage = end($messages);
         $prompt = $lastMessage['content'] ?? '';
 
+        // If JSON mode is requested, return valid JSON
+        if (isset($options['json_mode']) && $options['json_mode']) {
+            return [
+                'content' => json_encode([
+                    'result' => 'Mock JSON response',
+                    'status' => 'success',
+                    'data' => ['key' => 'value']
+                ]),
+                'tokens_used' => 50,
+                'model' => $model ?? 'gpt-4o-mini',
+                'finish_reason' => 'stop',
+                'success' => true,
+            ];
+        }
+
+        // Normal text response
         $result = $this->mockService->generateContent($prompt, [], $model);
 
         return [
