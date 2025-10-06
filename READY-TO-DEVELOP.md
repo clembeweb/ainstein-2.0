@@ -1,218 +1,304 @@
 # ✅ SYSTEM READY - Next Development Task
 
-**Last Updated**: 3 Ottobre 2025
-**Status**: 📋 Documentation Complete - Ready for Implementation
+**Last Updated**: 6 Ottobre 2025
+**Status**: 📋 Layer 1.2 Complete - Ready for Layer 2.1 (OpenAI Service)
 
 ---
 
-## 🎯 NEXT TASK: Admin Settings Centralization
+## 🎯 NEXT TASK: OpenAI Service Base
 
 **Priority**: P0 CRITICAL
-**Estimated Time**: 8-12 hours
-**Spec Document**: [`docs/01-project-overview/ADMIN-SETTINGS-CENTRALIZATION.md`](docs/01-project-overview/ADMIN-SETTINGS-CENTRALIZATION.md)
+**Estimated Time**: 2 giorni (16h)
+**Spec Document**: [`docs/01-project-overview/DEVELOPMENT-ROADMAP.md` - Lines 110-142](docs/01-project-overview/DEVELOPMENT-ROADMAP.md#L110-L142)
 
 ---
 
-## 🚀 QUICK START
+## ✅ COMPLETATO: Admin Settings Centralization
+
+**Commit**: `84bccae`
+**Status**: ✅ Complete
+**Features**:
+- ✅ Migration con 23 nuove colonne (OAuth, OpenAI, Stripe, Email, Advanced)
+- ✅ PlatformSetting model con encryption & caching
+- ✅ Admin UI con 6 tabs (OAuth, OpenAI, Stripe, Email, Branding, Advanced)
+- ✅ Logo upload con auto-resize (256px, 64px, 32px)
+- ✅ OpenAiService refactorato per usare `PlatformSetting::get()`
+- ✅ Test completi (6 categorie, tutti passati)
+
+---
+
+## 🚀 QUICK START - OpenAI Service Base
 
 Quando digiti **"prosegui"** in una nuova chat, l'AI eseguirà automaticamente:
 
 1. ✅ Legge `START-HERE.md` per context
 2. ✅ Legge `.project-status` per task corrente
-3. ✅ Identifica: **Admin Settings Centralization (P0 CRITICAL)**
-4. ✅ Apre spec: `ADMIN-SETTINGS-CENTRALIZATION.md`
-5. ✅ Inizia implementazione con:
-
-```bash
-cd ainstein-laravel
-php artisan make:migration expand_platform_settings_oauth
-```
+3. ✅ Identifica: **Layer 2.1 - OpenAI Service Base (P0 CRITICAL)**
+4. ✅ Apre spec: `DEVELOPMENT-ROADMAP.md` (lines 110-142)
+5. ✅ Inizia implementazione
 
 ---
 
 ## 📋 IMPLEMENTATION CHECKLIST
 
-### Phase 1: Database (2h)
-- [ ] Create migration `expand_platform_settings_oauth.php`
-- [ ] Add OAuth fields (Google Ads, Facebook, GSC)
-- [ ] Add OpenAI configuration fields
-- [ ] Add Stripe configuration fields
-- [ ] Add Email SMTP fields
-- [ ] Add Cache/Queue fields
-- [ ] Add logo paths fields
-- [ ] Run migration: `php artisan migrate`
+### Day 1: Service Core (8h)
 
-### Phase 2: Model Enhancement (2h)
-- [ ] Update `PlatformSetting` model
-- [ ] Add encrypted fields array
-- [ ] Implement `get()` static method with cache
-- [ ] Implement `set()` static method
-- [ ] Add helper methods: `isGoogleAdsConfigured()`, etc.
-- [ ] Add `featureEnabled()` method
+#### 1. Service Base Class (3h) - P0
+```bash
+cd ainstein-laravel
+mkdir -p app/Services/AI
+php artisan make:service AI/OpenAIService
+```
 
-### Phase 3: Controller & Routes (2h)
-- [ ] Update `PlatformSettingsController`
-- [ ] Add `updateOAuth()` method
-- [ ] Add `updateOpenAI()` method
-- [ ] Add `updateStripe()` method
-- [ ] Add `updateEmail()` method
-- [ ] Add `updateAdvanced()` method
-- [ ] Add `uploadLogo()` method
-- [ ] Add `testOpenAI()` method
-- [ ] Add `testStripe()` method
-- [ ] Add all routes in `routes/web.php`
+**Tasks**:
+- [ ] Create `app/Services/AI/OpenAIService.php`
+- [ ] Implement methods:
+  - `chat(array $messages, string $model = null, array $options = [])`
+  - `completion(string $prompt, string $model = null, array $options = [])`
+  - `embeddings(string|array $text)`
+  - `parseJSON(array $messages)` // Force JSON response
+- [ ] Integration con token tracking esistente
+  - `trackTokenUsage($tenantId, $tokens, $model, $source, $metadata)`
+- [ ] Use `PlatformSetting::get()` per API key/model/temperature
 
-### Phase 4: Views (3h)
-- [ ] Create tabbed settings UI (`admin/settings/index.blade.php`)
-- [ ] OAuth tab with Google Ads, Facebook, GSC forms
-- [ ] OpenAI tab with API key, model, tokens, temperature
-- [ ] Stripe tab with keys and test mode toggle
-- [ ] Email SMTP tab
-- [ ] Advanced tab (Cache/Queue settings)
-- [ ] Logo & Branding tab with upload form
-- [ ] Style with Tailwind CSS + Alpine.js
+#### 2. Error Handling & Retry Logic (3h) - P0
+**Tasks**:
+- [ ] Rate limit handling (exponential backoff)
+- [ ] Timeout management (30s default)
+- [ ] OpenAI error codes mapping
+- [ ] Retry logic (max 3 attempts)
+- [ ] Fallback to MockOpenAiService se API key fake
 
-### Phase 5: Logo Upload (1.5h)
-- [ ] Install Intervention/Image: `composer require intervention/image`
-- [ ] Implement upload controller method
-- [ ] Implement image resize (256px, 64px, 32px)
-- [ ] Implement delete method
-- [ ] Test upload/delete/display
+#### 3. Configuration File (2h) - P1
+**Tasks**:
+- [ ] Create `config/ai.php`
+- [ ] Default models per use case:
+  - `campaigns` → gpt-4o-mini
+  - `articles` → gpt-4o
+  - `seo` → gpt-4o-mini
+- [ ] Temperature settings per use case
+- [ ] Max tokens per use case
 
-### Phase 6: Service Refactoring (1.5h)
-- [ ] Refactor `OpenAiService` to use `PlatformSetting::get()`
-- [ ] Remove hardcoded API keys from services
-- [ ] Update all services to use centralized settings
-- [ ] Test content generation with new config
+### Day 2: Integration & Testing (8h)
 
-### Phase 7: Multi-Hosting (1h)
-- [ ] Create `app/Services/HostingDetector.php`
-- [ ] Implement `detect()` method
-- [ ] Implement `hasRedis()` method
-- [ ] Implement recommendation methods
-- [ ] Test on SiteGround environment
+#### 4. Token Tracking Integration (2h) - P0
+**Tasks**:
+- [ ] Extend `TokenTracking` model se necessario
+- [ ] Implement `trackUsage()` method
+- [ ] Add `source` field (campaign, article, seo, etc.)
+- [ ] Add `metadata` JSON field per context
 
-### Phase 8: Testing (1h)
-- [ ] Test OAuth credentials save/load
-- [ ] Test OpenAI test connection button
-- [ ] Test Stripe test connection button
-- [ ] Test logo upload/resize/delete
-- [ ] Test encryption/decryption
-- [ ] Test with empty settings (fallback)
-- [ ] Test multi-hosting detection
+#### 5. Testing Suite (4h) - P1
+**Tasks**:
+- [ ] Unit test: `OpenAIServiceTest.php`
+- [ ] Test chat completion
+- [ ] Test JSON response parsing
+- [ ] Test token tracking
+- [ ] Test retry logic (mock rate limit)
+- [ ] Test error handling
+- [ ] Test fallback to MockService
+
+#### 6. Documentation (2h) - P1
+**Tasks**:
+- [ ] PHPDoc completo per tutti i metodi
+- [ ] Usage examples in comments
+- [ ] Update `.project-status`
+- [ ] Create `docs/02-tools-refactoring/OPENAI-SERVICE-GUIDE.md`
 
 ---
 
 ## 🎯 SUCCESS CRITERIA
 
-✅ **Zero hardcoded values** in codebase (all in Admin UI)
-✅ **OAuth credentials** stored encrypted in database
-✅ **Logo upload** with automatic resize (3 sizes)
-✅ **Test buttons** for API connections working
-✅ **Multi-hosting** detection functional
-✅ **Cache** implemented for settings (performance)
-✅ **Fallback** to `.env` if settings not configured
+✅ **Chat completion** funziona con modelli multipli
+✅ **JSON parsing** robusto e testato
+✅ **Token tracking** salvato correttamente in DB
+✅ **Retry logic** testato con rate limit simulato
+✅ **Error handling** gestisce tutti i casi edge
+✅ **Mock service** si attiva automaticamente con fake keys
+✅ **Configuration** centralizzata in `config/ai.php`
+✅ **Test coverage** > 80% per OpenAIService
 
 ---
 
-## 📊 IMPACT
+## 📊 TECHNICAL SPECIFICATIONS
 
-### Before
-- ❌ API keys hardcoded in `.env`
-- ❌ Configuration changes require code deployment
-- ❌ No logo customization
-- ❌ Manual OAuth setup
-- ❌ SiteGround-only compatibility
+### Service Methods Signature
 
-### After
-- ✅ All settings in Admin UI
-- ✅ Zero-downtime configuration changes
-- ✅ Logo upload for branding
-- ✅ OAuth setup via UI
-- ✅ Multi-hosting compatibility (SiteGround, Forge, AWS, etc.)
+```php
+namespace App\Services\AI;
+
+use App\Models\Tenant;
+use OpenAI;
+use Illuminate\Support\Facades\Log;
+use Exception;
+
+class OpenAIService
+{
+    /**
+     * Chat completion with message history
+     *
+     * @param array $messages [['role' => 'user', 'content' => '...']]
+     * @param string|null $model Override default model
+     * @param array $options ['temperature' => 0.7, 'max_tokens' => 2000]
+     * @return array ['content' => '...', 'tokens' => 123, 'model' => 'gpt-4o']
+     */
+    public function chat(array $messages, string $model = null, array $options = []): array;
+
+    /**
+     * Simple completion (single prompt)
+     *
+     * @param string $prompt
+     * @param string|null $model
+     * @param array $options
+     * @return array
+     */
+    public function completion(string $prompt, string $model = null, array $options = []): array;
+
+    /**
+     * Generate embeddings for semantic search
+     *
+     * @param string|array $text
+     * @return array
+     */
+    public function embeddings(string|array $text): array;
+
+    /**
+     * Force JSON response from OpenAI
+     *
+     * @param array $messages
+     * @return array Parsed JSON response
+     */
+    public function parseJSON(array $messages): array;
+
+    /**
+     * Track token usage for billing
+     *
+     * @param string $tenantId
+     * @param int $tokens
+     * @param string $model
+     * @param string $source (campaign, article, seo, etc.)
+     * @param array $metadata
+     * @return void
+     */
+    protected function trackTokenUsage(string $tenantId, int $tokens, string $model, string $source, array $metadata = []): void;
+
+    /**
+     * Retry logic with exponential backoff
+     *
+     * @param callable $callback
+     * @param int $maxAttempts
+     * @return mixed
+     */
+    protected function retry(callable $callback, int $maxAttempts = 3): mixed;
+}
+```
+
+### config/ai.php Structure
+
+```php
+return [
+    // Default models per use case
+    'models' => [
+        'campaigns' => env('AI_MODEL_CAMPAIGNS', 'gpt-4o-mini'),
+        'articles' => env('AI_MODEL_ARTICLES', 'gpt-4o'),
+        'seo' => env('AI_MODEL_SEO', 'gpt-4o-mini'),
+        'default' => env('AI_MODEL_DEFAULT', 'gpt-4o-mini'),
+    ],
+
+    // Temperature settings
+    'temperature' => [
+        'campaigns' => 0.8, // More creative for ads
+        'articles' => 0.7,  // Balanced for content
+        'seo' => 0.5,       // More deterministic
+        'default' => 0.7,
+    ],
+
+    // Max tokens
+    'max_tokens' => [
+        'campaigns' => 1000,
+        'articles' => 4000,
+        'seo' => 2000,
+        'default' => 2000,
+    ],
+
+    // Retry settings
+    'retry' => [
+        'max_attempts' => 3,
+        'backoff_multiplier' => 2, // seconds
+    ],
+
+    // Timeout (seconds)
+    'timeout' => 30,
+
+    // Rate limiting
+    'rate_limit' => [
+        'requests_per_minute' => 60,
+        'tokens_per_day' => 100000,
+    ],
+];
+```
 
 ---
 
 ## 📁 FILES TO CREATE/MODIFY
 
 ### New Files
-1. `database/migrations/2025_10_03_XXXXXX_expand_platform_settings_oauth.php`
-2. `app/Services/HostingDetector.php`
-3. `resources/views/admin/settings/index.blade.php` (enhancement)
-4. `deployment/siteground-deploy.sh`
-5. `deployment/forge-deploy.sh`
-6. `nginx.conf.example`
-7. `Dockerfile`
-8. `docker-compose.yml`
+1. `app/Services/AI/OpenAIService.php` (core service)
+2. `config/ai.php` (configuration)
+3. `tests/Unit/Services/AI/OpenAIServiceTest.php`
+4. `docs/02-tools-refactoring/OPENAI-SERVICE-GUIDE.md`
 
 ### Files to Modify
-1. `app/Models/PlatformSetting.php` (add fields + methods)
-2. `app/Http/Controllers/Admin/PlatformSettingsController.php` (add methods)
-3. `app/Services/OpenAiService.php` (use PlatformSetting::get())
-4. `routes/web.php` (add settings routes)
-5. `config/filesystems.php` (logo storage)
+1. `app/Services/OpenAiService.php` → **Deprecare** in favore del nuovo
+2. `database/migrations/XXXX_add_metadata_to_token_tracking.php` (se necessario)
 
 ---
 
 ## 🔧 DEPENDENCIES
 
-### Composer Packages
-```bash
-composer require intervention/image
-```
+### Existing Packages (already installed)
+- ✅ `openai-php/client` (already in composer.json)
+- ✅ Laravel HTTP Client
+- ✅ Redis (for rate limiting)
 
-### PHP Extensions (già disponibili)
-- ✅ GD or Imagick (image manipulation)
-- ✅ OpenSSL (encryption)
-- ✅ PDO MySQL (database)
-
-### Environment Requirements
-- ✅ PHP 8.2+
-- ✅ MySQL 8.0+
-- ✅ Laravel 12.31.1
-- ✅ Redis (optional, fallback to database)
+### No New Dependencies Needed
 
 ---
 
 ## 📝 NOTES FOR DEVELOPER
 
 ### Important Reminders
-1. **Encryption**: Use `Crypt::encryptString()` for all secrets
-2. **Cache**: Cache settings for 1 hour (`Cache::remember()`)
-3. **Validation**: Validate all inputs before saving
-4. **Fallback**: Keep `.env` as fallback if DB settings empty
-5. **Security**: Protect settings page with `SuperAdminMiddleware`
-6. **Audit**: Consider adding activity log for settings changes
-7. **Backup**: Include settings in database backups
+1. **Backward Compatibility**: Il vecchio `OpenAiService.php` deve continuare a funzionare
+2. **Migration Path**: Refactor graduale, non breaking changes
+3. **Testing**: Test PRIMA dell'implementazione (TDD approach)
+4. **Token Tracking**: Ogni chiamata DEVE tracciare token usage
+5. **Rate Limiting**: Implementare throttling per evitare ban OpenAI
+6. **Error Messages**: User-friendly, non esporre dettagli tecnici
+7. **Logging**: Log INFO per success, WARNING per retry, ERROR per failures
 
 ### Testing Workflow
 ```bash
-# 1. Create migration
-php artisan make:migration expand_platform_settings_oauth
+# 1. Create service
+php artisan make:service AI/OpenAIService
 
-# 2. Run migration
-php artisan migrate
+# 2. Create test
+php artisan make:test Services/AI/OpenAIServiceTest --unit
 
-# 3. Test model
+# 3. Run tests
+php artisan test --filter=OpenAIServiceTest
+
+# 4. Test in Tinker
 php artisan tinker
->>> PlatformSetting::set('openai_api_key', 'test-key')
->>> PlatformSetting::get('openai_api_key')
+>>> use App\Services\AI\OpenAIService;
+>>> $service = app(OpenAIService::class);
+>>> $result = $service->chat([['role' => 'user', 'content' => 'Hello']]);
+>>> print_r($result);
 
-# 4. Test encryption
->>> $encrypted = Crypt::encryptString('secret')
->>> Crypt::decryptString($encrypted)
+# 5. Test token tracking
+>>> \App\Models\TokenTracking::latest()->first();
 
-# 5. Test logo upload
-# Upload via UI, check storage/app/public/logos/
-
-# 6. Test hosting detection
->>> use App\Services\HostingDetector;
->>> HostingDetector::detect()
->>> HostingDetector::hasRedis()
-
-# 7. Clear cache after changes
-php artisan config:clear
-php artisan cache:clear
+# 6. Test error handling
+>>> $service->chat([['role' => 'user', 'content' => str_repeat('a', 100000)]]);
 ```
 
 ---
@@ -221,35 +307,31 @@ php artisan cache:clear
 
 This task is **P0 CRITICAL** because:
 
-1. **Blocks Future Features**: Tool integrations require OAuth credentials
-2. **Security**: Hardcoded API keys are security risk
-3. **Scalability**: Multi-hosting needed for production
-4. **User Experience**: Admin must configure without touching code
-5. **Technical Debt**: Eliminates hardcoded values (DEBT_1)
+1. **Foundation for All Tools**: 4 su 6 tool usano OpenAI
+2. **Token Billing**: Accurato tracking necessario per billing
+3. **Performance**: Retry logic evita fallimenti transient
+4. **User Experience**: Error handling migliora UX
+5. **Scalability**: Rate limiting previene ban API
 
-**Do NOT proceed to Tool Architecture** until this is complete!
+**Do NOT proceed to Campaign Generator** until questo è production-ready!
 
 ---
 
 ## 📚 REFERENCE DOCUMENTS
 
-1. **Spec**: [`docs/01-project-overview/ADMIN-SETTINGS-CENTRALIZATION.md`](docs/01-project-overview/ADMIN-SETTINGS-CENTRALIZATION.md)
-2. **Architecture**: [`docs/01-project-overview/ARCHITECTURE.md`](docs/01-project-overview/ARCHITECTURE.md)
-3. **Deployment**: [`docs/01-project-overview/DEPLOYMENT-COMPATIBILITY.md`](docs/01-project-overview/DEPLOYMENT-COMPATIBILITY.md)
-4. **Roadmap**: [`docs/01-project-overview/DEVELOPMENT-ROADMAP.md`](docs/01-project-overview/DEVELOPMENT-ROADMAP.md)
+1. **Roadmap**: [`docs/01-project-overview/DEVELOPMENT-ROADMAP.md`](docs/01-project-overview/DEVELOPMENT-ROADMAP.md) (Lines 110-142)
+2. **OpenAI API Docs**: [https://platform.openai.com/docs](https://platform.openai.com/docs)
+3. **OpenAI PHP Client**: [https://github.com/openai-php/client](https://github.com/openai-php/client)
 
 ---
 
 ## 🎓 AFTER THIS TASK
 
-Once Admin Settings Centralization is complete:
+Once OpenAI Service Base is complete:
 
-**Next Task**: Plan Tool Architecture
-- Map 6 tools into 3 macro areas (SEO, ADV, Copy)
-- Define tool categories seeding
-- Create first tool (SEO Content Generator)
-
-**Reference**: `.project-status` → `PRIORITY_2`
+**Next Task**: Layer 3.1 - Campaign Generator (Database & Models)
+**Estimated Time**: 1 giorno (8h)
+**Reference**: `DEVELOPMENT-ROADMAP.md` Lines 228-255
 
 ---
 
@@ -257,26 +339,25 @@ Once Admin Settings Centralization is complete:
 
 Before marking this task as complete, verify:
 
-- [ ] Can configure Google Ads OAuth from Admin UI
-- [ ] Can configure Facebook OAuth from Admin UI
-- [ ] Can configure OpenAI API key from Admin UI (test button works)
-- [ ] Can configure Stripe keys from Admin UI (test button works)
-- [ ] Can upload logo (displays in dashboard)
-- [ ] Can delete logo
-- [ ] Settings are encrypted in database
-- [ ] Settings are cached (performance)
-- [ ] HostingDetector correctly identifies SiteGround
-- [ ] OpenAiService uses PlatformSetting::get() not env()
-- [ ] Zero hardcoded API keys remain in codebase
-- [ ] All tests passing
+- [ ] `OpenAIService::chat()` funziona con gpt-4o-mini
+- [ ] `OpenAIService::chat()` funziona con gpt-4o
+- [ ] `OpenAIService::parseJSON()` restituisce JSON valido
+- [ ] Token usage salvato in `token_tracking` table
+- [ ] Retry logic testato (simula rate limit)
+- [ ] Error handling testato (API key invalida, timeout, ecc.)
+- [ ] MockOpenAiService si attiva con fake key
+- [ ] `config/ai.php` creato e funzionante
+- [ ] Test coverage > 80%
+- [ ] PHPDoc completo
+- [ ] Nessuna regressione su `OpenAiService.php` esistente
 
 ---
 
-**🚀 Ready to start development - Digita "prosegui" per iniziare!**
+**🚀 Ready to start - Digita "proseguiamo" per iniziare Layer 2.1!**
 
 ---
 
-_Created: 3 Ottobre 2025_
+_Created: 6 Ottobre 2025_
 _Task Priority: P0 CRITICAL_
-_Estimated Time: 8-12 hours_
-_Blocks: Tool Architecture Planning, OAuth Integrations_
+_Estimated Time: 2 giorni (16h)_
+_Blocks: Campaign Generator, Article Generator, SEO Tools_
