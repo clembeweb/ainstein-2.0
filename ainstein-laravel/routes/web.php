@@ -5,6 +5,7 @@ use App\Http\Controllers\TenantPageController;
 use App\Http\Controllers\TenantApiKeyController;
 use App\Http\Controllers\TenantPromptController;
 use App\Http\Controllers\TenantContentController;
+use App\Http\Controllers\TestOpenAIController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\PasswordResetController;
@@ -119,6 +120,16 @@ Route::middleware(['auth', \App\Http\Middleware\CheckMaintenanceMode::class, \Ap
 Route::get('/api/docs', function () {
     return view('api.docs');
 })->name('api.docs');
+
+// OpenAI Service Testing (for development/testing only)
+Route::prefix('test-openai')->group(function () {
+    Route::get('/', [TestOpenAIController::class, 'index']);
+    Route::post('/chat', [TestOpenAIController::class, 'testChat']);
+    Route::post('/completion', [TestOpenAIController::class, 'testCompletion']);
+    Route::post('/json', [TestOpenAIController::class, 'testJSON']);
+    Route::post('/embeddings', [TestOpenAIController::class, 'testEmbeddings']);
+    Route::post('/error', [TestOpenAIController::class, 'testError']);
+});
 
 // Public routes
 Route::get('/health', function () {

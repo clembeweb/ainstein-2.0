@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'login',
             'register',
+            'test-openai/*',  // Exclude OpenAI test endpoints (development only)
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
