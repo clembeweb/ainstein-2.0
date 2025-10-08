@@ -15,7 +15,8 @@
       "Bash(bash:*)",
       "Bash(start http://localhost:8000/dashboard/content?tab=generations)",
       "Bash(chmod:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git branch:*)"
     ],
     "deny": [],
     "ask": []

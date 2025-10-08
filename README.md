@@ -1,238 +1,161 @@
-# 🚀 Ainstein Platform - Multi-Tenant AI SaaS
+# Ainstein - AI-Powered Content Generation Platform
 
-**Laravel 12.31.1** | **Multi-Tenancy** | **Token-based Billing** | **AI-First Tools**
+[![Laravel](https://img.shields.io/badge/Laravel-11.x-red.svg)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.2+-blue.svg)](https://php.net)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-**Last Updated**: 2025-10-06
-**Status**: ✅ **Production Ready** - Layer 2 Complete (100% tested)
+Ainstein is a powerful multi-tenant SaaS platform that leverages AI to generate high-quality, SEO-optimized content. Built with Laravel 11, it provides a comprehensive solution for businesses and content creators who need scalable AI content generation capabilities.
 
----
+## 🚀 Features
 
-## 🎉 LATEST UPDATES (2025-10-06)
+### Core Features
+- **AI Content Generation**: Generate articles, blog posts, and marketing copy using OpenAI's GPT models
+- **Multi-Tenancy**: Complete tenant isolation with individual databases or shared database with tenant scoping
+- **SEO Optimization**: Automatic generation of SEO-friendly titles and meta descriptions
+- **Custom Prompts**: Create and manage custom prompt templates for specific content needs
+- **Multi-Language Support**: Generate content in multiple languages
+- **Queue System**: Background processing for AI content generation
+- **Token Management**: Track and manage OpenAI API token usage per tenant
 
-✅ **Content Generator Unified** - 3-tab interface (Pages/Generations/Prompts)
-✅ **Action Buttons Fixed** - View/Edit/Copy/Delete now visible and functional
-✅ **FontAwesome Integration** - Global icon library added to layouts
-✅ **Comprehensive Documentation** - Architecture Overview + 6-month Roadmap
-✅ **OpenAI Service** - Production-ready (11/11 tests passing)
-✅ **Guided Onboarding** - 13-step interactive tour complete
+### Admin Features
+- **Super Admin Dashboard**: Comprehensive admin panel built with Filament
+- **Tenant Management**: Create, manage, and monitor tenant accounts
+- **User Management**: Role-based access control with admin, tenant admin, and user roles
+- **System Analytics**: Monitor platform usage, token consumption, and performance metrics
+- **Platform Settings**: Configure OpenAI API keys, models, and system-wide settings
 
-**See**:
-- [`SESSION-REPORT-2025-10-06.md`](SESSION-REPORT-2025-10-06.md) - Today's bug fixes and documentation
-- [`ARCHITECTURE-OVERVIEW.md`](ARCHITECTURE-OVERVIEW.md) - Complete technical architecture (66 KB)
-- [`DEVELOPMENT-ROADMAP.md`](DEVELOPMENT-ROADMAP.md) - 6-month development plan (72 KB)
+### API Features
+- **RESTful API**: Complete API for all platform features
+- **API Authentication**: Laravel Sanctum token-based authentication
+- **Rate Limiting**: Configurable API rate limits per user/tenant
+- **API Documentation**: Comprehensive API documentation with examples
+- **Webhook Support**: Event-driven integrations
 
----
+### Tenant Dashboard
+- **Modern UI**: Responsive design built with Tailwind CSS
+- **Content Management**: Manage pages, content generations, and prompts
+- **Usage Analytics**: Track token usage, content generation statistics
+- **Settings Management**: Configure tenant settings, user profiles, API access
 
-## 📋 Quick Start
+## 📋 Requirements
 
-### 🚀 Comando Magico per Riprendere il Lavoro
+- **PHP**: 8.2 or higher
+- **Database**: MySQL 8.0+ or PostgreSQL 13+
+- **Web Server**: Nginx or Apache
+- **Cache**: Redis (recommended) or Memcached
+- **Queue**: Redis, Database, or SQS
+- **Composer**: 2.x
+- **Node.js**: 18+ (for asset compilation)
 
-**In una nuova chat, digita semplicemente**:
+## 🛠️ Installation
 
-```
-proseguiamo
-```
+### Quick Start with Docker
 
-**L'AI leggerà automaticamente la documentazione e proseguirà con lo sviluppo!**
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd ainstein-laravel
+   ```
 
----
+2. **Setup environment:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your OpenAI API key and database settings
+   ```
 
-### 📖 Per capire il progetto (prima volta)
+3. **Start with Docker:**
+   ```bash
+   docker-compose up -d
+   ```
 
-**👉 INIZIA DA QUI**: [`START-HERE.md`](START-HERE.md)
+4. **Setup application:**
+   ```bash
+   docker-compose exec app php artisan migrate --seed
+   ```
 
-Poi leggi:
-- [`docs/01-project-overview/DEVELOPMENT-ROADMAP.md`](docs/01-project-overview/DEVELOPMENT-ROADMAP.md) - Roadmap ingegneristica 8 settimane
-- [`docs/01-project-overview/PROJECT-INDEX.md`](docs/01-project-overview/PROJECT-INDEX.md) - Master index completo
+5. **Access the application:**
+   - **Frontend**: http://localhost:8000
+   - **Admin Panel**: http://localhost:8000/admin
+   - **API Docs**: http://localhost:8000/api/docs
 
----
+### Manual Installation
 
-## 📚 Documentazione Completa
+1. **Clone and setup:**
+   ```bash
+   git clone <repository-url>
+   cd ainstein-laravel
+   composer install
+   cp .env.example .env
+   ```
 
-Tutta la documentazione è organizzata in [`docs/`](docs/):
+2. **Configure environment:**
+   ```bash
+   php artisan key:generate
+   # Edit .env file with your configuration
+   ```
 
-```
-docs/
-├── README.md                          📚 Hub documentazione
-│
-├── 01-project-overview/               🎯 Panoramica progetto
-│   ├── PROJECT-INDEX.md              ⭐⭐⭐ MASTER INDEX - Start here!
-│   ├── BILLING-INTEGRATION-GUIDE.md   Sistema billing Stripe
-│   └── BILLING-CONFIG-ADMIN.md        Config admin panel
-│
-├── 02-tools-refactoring/              🛠️ Refactoring 6 tool AI
-│   ├── TOOL-REFACTORING-PLAN.md      ⭐⭐⭐ Piano 33 giorni
-│   ├── REFACTORING-TOOL.md            Template generico
-│   ├── AINSTEIN-TOOLS-VISION.md      ⭐⭐ Visione AI-first
-│   └── TOOL-*.md                      6 tool specifici
-│
-├── 03-design-system/                  🎨 UI/UX Guidelines
-│   ├── AINSTEIN-UI-UX-DESIGN-SYSTEM.md   Design system completo
-│   └── AINSTEIN-ONBOARDING-SYSTEM.md     Sistema tour Shepherd.js
-│
-└── 04-archive/                        📦 Documenti storici
-    └── SITUAZIONE-ATTUALE.md          Storia Next.js → Laravel
-```
+3. **Setup database:**
+   ```bash
+   php artisan migrate
+   php artisan db:seed
+   ```
 
-**👉 Vai a**: [`docs/README.md`](docs/README.md) per navigazione completa
+4. **Start development server:**
+   ```bash
+   php artisan serve
+   php artisan queue:work
+   ```
 
----
+## 🏗️ Usage
 
-## 🎯 Stato Progetto
+### Demo Account
+Use the demo account to explore the platform:
+- **Email**: demo@tenant.com
+- **Password**: password
 
-### ✅ Completato
-- ✅ Piattaforma Laravel base (admin panel + tenant dashboard)
-- ✅ Sistema multi-tenancy funzionante
-- ✅ Autenticazione + autorizzazione (Policies)
-- ✅ Token tracking per billing
-- ✅ Onboarding system (Shepherd.js)
-- ✅ **Documentazione completa 6 tool** (33 giorni implementazione)
+### Super Admin Account
+Default super admin credentials:
+- **Email**: admin@ainstein.com
+- **Password**: password
 
-### 🔨 In Corso
-- ⏸️ **PROSSIMO**: Implementazione tool (Phase 1: Admin API Keys Setup)
+### API Usage
 
-### 📅 Roadmap
-- **Phase 1** (Week 1-2): Admin API Keys + OpenAI Service base
-- **Phase 2** (Week 3): Campaign Generator (ADV)
-- **Phase 3** (Week 4-5): Article Generator (COPY)
-- **Phase 4** (Week 6): SEO Tools (Keyword Research, Internal Links)
-- **Phase 5** (Week 7): Advanced Tools (OAuth Google Ads/GSC)
+1. **Authenticate:**
+   ```bash
+   curl -X POST http://localhost:8000/api/auth/login \
+     -H "Content-Type: application/json" \
+     -d '{"email":"demo@tenant.com","password":"password"}'
+   ```
 
----
+2. **Create a page:**
+   ```bash
+   curl -X POST http://localhost:8000/api/pages \
+     -H "Authorization: Bearer YOUR_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"url_path":"/blog/example","keyword":"AI content","category":"technology"}'
+   ```
 
-## 🛠️ Tool da Implementare (6 totali)
+3. **Generate content:**
+   ```bash
+   curl -X POST http://localhost:8000/api/content-generations \
+     -H "Authorization: Bearer YOUR_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"page_id":"PAGE_ID","prompt_type":"article"}'
+   ```
 
-### ADV (Advertising)
-1. **Campaign Generator** - Google Ads asset (RSA/PMax) con AI
-2. **Negative Keywords** - Gestione keyword negate + OAuth Google Ads
+## 🚀 Deployment
 
-### COPY (Content)
-3. **Article Generator** - Pipeline AI 6-step per articoli automatici
+See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
 
-### SEO
-4. **Internal Links** - Suggerimenti AI link interni
-5. **GSC Tracker** - Google Search Console position tracking
-6. **Keyword Research** - Multi-API keyword research + AI generator
-
----
-
-## 🚀 Setup Locale
-
-### ⚡ Installazione Automatica (Consigliata)
-
+### Quick Deploy
 ```bash
-# Clone repository
-git clone https://github.com/[username]/ainstein-3.git ainstein
-cd ainstein
-
-# Esegui installer automatico
-bash install.sh
+chmod +x deploy.sh
+./deploy.sh
 ```
 
-Lo script verificherà requisiti, installerà dipendenze, configurerà database e avvierà il server automaticamente.
+## 📚 API Documentation
 
-**Per Claude**: Vedi [`CLAUDE-INSTALL-PROMPT.md`](CLAUDE-INSTALL-PROMPT.md) per installazione automatica tramite AI.
-
----
-
-### 📖 Installazione Manuale
-
-Guida completa: [`INSTALLATION-GUIDE.md`](INSTALLATION-GUIDE.md)
-
-**Requisiti**:
-- PHP 8.3+
-- Composer 2.6+
-- Node.js 18+
-- MySQL/SQLite
-- Git
-
-**Step rapidi**:
-
-```bash
-# Clone repository
-git clone https://github.com/[username]/ainstein-3.git
-cd ainstein-3/ainstein-laravel
-
-# Install dependencies
-composer install
-npm install
-
-# Environment setup
-cp .env.example .env
-php artisan key:generate
-
-# Database
-touch database/database.sqlite
-php artisan migrate --seed
-
-# Build assets
-npm run build
-
-# Serve
-php artisan serve
-```
-
-### 🔑 Credenziali Demo
-```
-Demo Tenant Admin:  admin@demo.com / password
-Demo Tenant Member: member@demo.com / password
-Demo Tenant Guest:  guest@demo.com / password
-```
-
-⚠️ **Cambia le password in produzione!**
-
----
-
-## 📖 Lettura Rapida (15 min)
-
-### Per riprendere il progetto in nuova chat:
-
-1. **`docs/01-project-overview/PROJECT-INDEX.md`** (10 min)
-   - Status attuale + prossimi step
-   - Checklist ripresa lavoro
-
-2. **`docs/02-tools-refactoring/TOOL-REFACTORING-PLAN.md`** (5 min)
-   - Piano implementazione 33 giorni
-   - Priorità tool
-
-**Poi sei pronto per implementare!** 🚀
-
----
-
-## 🔑 API Keys Necessarie
-
-### Obbligatorie (MVP)
-- ✅ **OpenAI API Key** - Già in `.env` → `OPENAI_API_KEY`
-- 🔶 **Google Ads OAuth** - Client ID/Secret (da configurare in admin)
-- 🔶 **Google Search Console OAuth** - JSON credentials
-
-### Opzionali (Enhancement)
-- 🔶 **SerpAPI** - SERP analysis
-- 🔶 **RapidAPI** - Keyword research multi-API
-
----
-
-## 📊 Tech Stack
-
-### Backend
-- **Laravel 12.31.1** - Framework PHP
-- **MySQL** - Database principale
-- **Redis** - Cache + Queue (opzionale)
-- **Spatie Multi-Tenancy** - Isolamento tenant
-
-### Frontend
-- **Blade Templates** - Server-side rendering
-- **Tailwind CSS** - Utility-first CSS
-- **Alpine.js** - Reactivity leggera
-- **Shepherd.js** - Onboarding tours
-
-### AI & External APIs
-- **OpenAI API** - GPT-4o, GPT-4o-mini, DALL-E 3
-- **Google Ads API** - Negative keywords management
-- **Google Search Console API** - Position tracking
-- **RapidAPI** - SEMrush, SEO tools
-
----
+Complete API documentation is available at `/api/docs` when running.
 
 ## 🧪 Testing
 
@@ -240,64 +163,29 @@ Demo Tenant Guest:  guest@demo.com / password
 # Run all tests
 php artisan test
 
-# Run specific test suite
-php artisan test --filter=OpenAIServiceTest
-php artisan test --filter=CampaignGeneratorTest
-
-# Feature tests
-php artisan test --testsuite=Feature
+# Run with coverage
+php artisan test --coverage
 ```
 
----
+## 🤝 Contributing
 
-## 🆘 Troubleshooting
-
-### OpenAI API errors
-→ Check `.env` → `OPENAI_API_KEY` presente
-→ Logs: `storage/logs/laravel.log`
-
-### Queue jobs non partono
-→ `php artisan queue:work` attivo?
-→ Redis connesso?
-
-### DataTables non carica
-→ JavaScript console errors
-→ API endpoint ritorna JSON?
-
-**Guida completa**: `docs/01-project-overview/PROJECT-INDEX.md` sezione "Troubleshooting"
-
----
-
-## 📝 Contribuire
-
-### Aggiungere nuovo tool
-
-1. Leggi template: `docs/02-tools-refactoring/REFACTORING-TOOL.md`
-2. Crea MD specifico in `docs/02-tools-refactoring/TOOL-[nome].md`
-3. Segui design system: `docs/03-design-system/AINSTEIN-UI-UX-DESIGN-SYSTEM.md`
-4. Aggiungi onboarding tour: `docs/03-design-system/AINSTEIN-ONBOARDING-SYSTEM.md`
-
----
-
-## 📞 Links
-
-- **Documentazione Completa**: [`docs/`](docs/)
-- **Master Index**: [`docs/01-project-overview/PROJECT-INDEX.md`](docs/01-project-overview/PROJECT-INDEX.md)
-- **OpenAI Platform**: https://platform.openai.com/
-- **Google Cloud Console**: https://console.cloud.google.com/
-
----
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
-Proprietario - Ainstein Platform © 2025
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Laravel**: The PHP framework that powers this application
+- **Filament**: Amazing admin panel package
+- **OpenAI**: AI capabilities through their powerful API
+- **Tailwind CSS**: Utility-first CSS framework
 
 ---
 
-**🚀 Ready to build AI-first SaaS tools!**
-
-**Prossimo step**: Leggi [`docs/01-project-overview/PROJECT-INDEX.md`](docs/01-project-overview/PROJECT-INDEX.md)
-
----
-
-_Last update: 3 Ottobre 2025_
+**Built with ❤️ using Laravel, OpenAI, and modern web technologies.**
