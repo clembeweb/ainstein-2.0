@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Crew;
 use App\Models\CrewExecution;
 use App\Models\CrewExecutionLog;
+use App\Jobs\ExecuteCrewJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -91,6 +92,7 @@ class CrewExecutionController extends Controller
         $validator = Validator::make($request->all(), [
             'input_variables' => 'nullable|array',
             'input_variables.*' => 'string|max:2000',
+            'use_mock' => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -117,11 +119,13 @@ class CrewExecutionController extends Controller
             Log::info('Crew execution created', [
                 'execution_id' => $execution->id,
                 'crew_id' => $crew->id,
-                'user_id' => $user->id
+                'user_id' => $user->id,
+                'use_mock' => $request->boolean('use_mock', false)
             ]);
 
-            // TODO: Dispatch job to execute crew via Python bridge
-            // ExecuteCrewJob::dispatch($execution);
+            // Dispatch job to execute crew
+            $useMock = $request->boolean('use_mock', false);
+            ExecuteCrewJob::dispatch($execution, $useMock);
 
             if ($request->expectsJson()) {
                 return response()->json([
@@ -288,8 +292,8 @@ class CrewExecutionController extends Controller
                 'retry_count' => $execution->retry_count + 1,
             ]);
 
-            // TODO: Dispatch job to execute crew
-            // ExecuteCrewJob::dispatch($newExecution);
+            // Dispatch job to execute crew (always with real mode on retry)
+            ExecuteCrewJob::dispatch($newExecution, false);
 
             Log::info('Crew execution retried', [
                 'original_execution_id' => $execution->id,
