@@ -40,3 +40,28 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 tool-refactoring-ainstein/
+
+# Laravel
+/vendor
+/storage/*.key
+/storage/logs
+/storage/framework
+/public/storage
+/public/hot
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+
+# Claude local settings
+.claude/settings.local.json
+
+# Python virtual environments
+python/venv/
+python/__pycache__/
+python/*.pyc
+
+# Temporary developer notes
+IMMEDIATE_ACTIONS.md
+QUICK_COMMANDS.md
