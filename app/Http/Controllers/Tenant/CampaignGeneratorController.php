@@ -89,6 +89,116 @@ class CampaignGeneratorController extends Controller
         return view('tenant.campaigns.show', compact('campaign'));
     }
 
+    public function edit($id)
+    {
+        $user = Auth::user();
+        $tenant = $user->tenant;
+
+        $campaign = AdvCampaign::where('tenant_id', $tenant->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        // Check authorization
+        $this->authorize('update', $campaign);
+
+        return view('tenant.campaigns.edit', compact('campaign'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = Auth::user();
+        $tenant = $user->tenant;
+
+        $campaign = AdvCampaign::where('tenant_id', $tenant->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        // Check authorization
+        $this->authorize('update', $campaign);
+
+        $validated = $request->validate([
+            'campaign_name' => 'required|string|max:255',
+            'business_description' => 'required|string',
+            'target_keywords' => 'required|string',
+            'url' => 'nullable|url|max:500',
+            'language' => 'nullable|string|in:it,en,es,fr,de',
+        ]);
+
+        $campaign->update([
+            'name' => $validated['campaign_name'],
+            'info' => $validated['business_description'],
+            'keywords' => $validated['target_keywords'],
+            'url' => $validated['url'] ?? $campaign->url,
+            'language' => $validated['language'] ?? $campaign->language,
+        ]);
+
+        return redirect()->route('tenant.campaigns.show', $campaign->id)
+            ->with('success', 'Campaign aggiornata con successo!');
+    }
+
+    public function regenerate($id)
+    {
+        $user = Auth::user();
+        $tenant = $user->tenant;
+
+        $campaign = AdvCampaign::where('tenant_id', $tenant->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        // Check authorization (uses regenerate policy which checks tokens)
+        $this->authorize('regenerate', $campaign);
+
+        try {
+            // Delete old assets
+            $campaign->assets()->delete();
+
+            // Generate new assets using CampaignAssetsGenerator service
+            $service = app(\App\Services\Tools\CampaignAssetsGenerator::class);
+            $asset = $service->generate($campaign);
+
+            return redirect()->route('tenant.campaigns.show', $campaign->id)
+                ->with('success', 'Assets rigenerati con successo! Creati ' . count($asset->titles ?? []) . ' nuovi asset.');
+        } catch (\Exception $e) {
+            \Log::error('Campaign regeneration failed', [
+                'campaign_id' => $campaign->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('tenant.campaigns.show', $campaign->id)
+                ->with('error', 'Errore durante la rigenerazione: ' . $e->getMessage());
+        }
+    }
+
+    public function export($id, $format = 'csv')
+    {
+        $user = Auth::user();
+        $tenant = $user->tenant;
+
+        $campaign = AdvCampaign::where('tenant_id', $tenant->id)
+            ->where('id', $id)
+            ->with('assets')
+            ->firstOrFail();
+
+        // Check authorization
+        $this->authorize('export', $campaign);
+
+        if (!$campaign->assets || $campaign->assets->isEmpty()) {
+            return redirect()->route('tenant.campaigns.show', $campaign->id)
+                ->with('warning', 'Nessun asset da esportare per questa campaign.');
+        }
+
+        $asset = $campaign->assets->first();
+
+        if ($format === 'csv') {
+            return $this->exportCSV($campaign, $asset);
+        } elseif ($format === 'google-ads') {
+            return $this->exportGoogleAds($campaign, $asset);
+        }
+
+        return redirect()->route('tenant.campaigns.show', $campaign->id)
+            ->with('error', 'Formato export non valido.');
+    }
+
     public function destroy($id)
     {
         $user = Auth::user();
@@ -98,43 +208,152 @@ class CampaignGeneratorController extends Controller
             ->where('id', $id)
             ->firstOrFail();
 
+        // Check authorization
+        $this->authorize('delete', $campaign);
+
+        $campaignName = $campaign->name;
         $campaign->delete();
 
         return redirect()->route('tenant.campaigns.index')
-            ->with('success', 'Campaign deleted successfully');
+            ->with('success', "Campaign \"{$campaignName}\" eliminata con successo.");
     }
 
-    private function generateMockAssets(AdvCampaign $campaign)
+    /**
+     * Export campaign assets as CSV
+     */
+    private function exportCSV(AdvCampaign $campaign, AdvGeneratedAsset $asset)
     {
-        $assetType = $campaign->type === 'rsa' ? 'headline' : 'description';
-        $count = $campaign->type === 'rsa' ? 5 : 3;
+        $filename = 'campaign_' . $campaign->id . '_' . date('Y-m-d') . '.csv';
 
-        $mockContent = [
-            'headline' => [
-                'Professional SEO Services | Boost Your Ranking',
-                'Expert Web Design | Custom Solutions',
-                'Digital Marketing Agency | Results Driven',
-                'SEO Optimization | Increase Traffic Today',
-                'Affordable Web Development | Quality First',
-            ],
-            'description' => [
-                'Transform your online presence with our comprehensive digital marketing solutions. Expert team, proven results.',
-                'Get more customers with professional SEO services. Custom strategies tailored to your business goals.',
-                'Professional web design and development. Modern, responsive websites that convert visitors into customers.',
-            ],
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ];
 
-        for ($i = 0; $i < $count; $i++) {
-            AdvGeneratedAsset::create([
-                'campaign_id' => $campaign->id,
-                'asset_type' => $assetType,
-                'content' => $mockContent[$assetType][$i] ?? "Sample {$assetType} " . ($i + 1),
-                'tokens_used' => rand(50, 150),
-            ]);
-        }
+        $callback = function() use ($campaign, $asset) {
+            $file = fopen('php://output', 'w');
 
-        // Update campaign tokens
-        $campaign->tokens_used = $campaign->assets->sum('tokens_used');
-        $campaign->save();
+            // Header row
+            if ($campaign->type === 'rsa') {
+                fputcsv($file, ['Type', 'Content', 'Character Count']);
+
+                // Titles
+                foreach ($asset->titles ?? [] as $title) {
+                    fputcsv($file, ['Title', $title, mb_strlen($title)]);
+                }
+
+                // Descriptions
+                foreach ($asset->descriptions ?? [] as $desc) {
+                    fputcsv($file, ['Description', $desc, mb_strlen($desc)]);
+                }
+            } else { // PMAX
+                fputcsv($file, ['Type', 'Content', 'Character Count']);
+
+                // Short titles
+                foreach ($asset->titles ?? [] as $title) {
+                    fputcsv($file, ['Short Title', $title, mb_strlen($title)]);
+                }
+
+                // Long titles
+                foreach ($asset->long_titles ?? [] as $title) {
+                    fputcsv($file, ['Long Title', $title, mb_strlen($title)]);
+                }
+
+                // Descriptions
+                foreach ($asset->descriptions ?? [] as $desc) {
+                    fputcsv($file, ['Description', $desc, mb_strlen($desc)]);
+                }
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Export campaign assets in Google Ads compatible format
+     */
+    private function exportGoogleAds(AdvCampaign $campaign, AdvGeneratedAsset $asset)
+    {
+        $filename = 'google_ads_' . $campaign->id . '_' . date('Y-m-d') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($campaign, $asset) {
+            $file = fopen('php://output', 'w');
+
+            if ($campaign->type === 'rsa') {
+                // Google Ads RSA format
+                fputcsv($file, ['Campaign', 'Ad Group', 'Headline 1', 'Headline 2', 'Headline 3',
+                                'Headline 4', 'Headline 5', 'Headline 6', 'Headline 7', 'Headline 8',
+                                'Headline 9', 'Headline 10', 'Headline 11', 'Headline 12', 'Headline 13',
+                                'Headline 14', 'Headline 15', 'Description 1', 'Description 2',
+                                'Description 3', 'Description 4', 'Final URL']);
+
+                $row = [
+                    $campaign->name,
+                    'Ad Group 1',
+                ];
+
+                // Add up to 15 headlines
+                $titles = $asset->titles ?? [];
+                for ($i = 0; $i < 15; $i++) {
+                    $row[] = $titles[$i] ?? '';
+                }
+
+                // Add up to 4 descriptions
+                $descriptions = $asset->descriptions ?? [];
+                for ($i = 0; $i < 4; $i++) {
+                    $row[] = $descriptions[$i] ?? '';
+                }
+
+                $row[] = $campaign->url ?? '';
+
+                fputcsv($file, $row);
+            } else { // PMAX
+                // Google Ads Performance Max format
+                fputcsv($file, ['Campaign', 'Asset Group', 'Short Headline 1', 'Short Headline 2',
+                                'Short Headline 3', 'Short Headline 4', 'Short Headline 5',
+                                'Long Headline 1', 'Long Headline 2', 'Long Headline 3',
+                                'Long Headline 4', 'Long Headline 5',
+                                'Description 1', 'Description 2', 'Description 3',
+                                'Description 4', 'Description 5', 'Final URL']);
+
+                $row = [
+                    $campaign->name,
+                    'Asset Group 1',
+                ];
+
+                // Add short headlines (up to 5)
+                $titles = $asset->titles ?? [];
+                for ($i = 0; $i < 5; $i++) {
+                    $row[] = $titles[$i] ?? '';
+                }
+
+                // Add long headlines (up to 5)
+                $longTitles = $asset->long_titles ?? [];
+                for ($i = 0; $i < 5; $i++) {
+                    $row[] = $longTitles[$i] ?? '';
+                }
+
+                // Add descriptions (up to 5)
+                $descriptions = $asset->descriptions ?? [];
+                for ($i = 0; $i < 5; $i++) {
+                    $row[] = $descriptions[$i] ?? '';
+                }
+
+                $row[] = $campaign->url ?? '';
+
+                fputcsv($file, $row);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

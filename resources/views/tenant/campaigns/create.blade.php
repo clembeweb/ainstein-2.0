@@ -1,33 +1,50 @@
 @extends('layouts.app')
 
-@section('title', 'Create Campaign')
+@section('title', 'Nuova Campaign')
 
 @section('content')
-<div class="py-12">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="max-w-3xl">
-    <div class="bg-white rounded-lg shadow p-6">
-        <div class="mb-6">
-            <h3 class="text-lg font-semibold text-gray-900">Create New Campaign</h3>
-            <p class="text-gray-600">Generate AI-powered Google Ads campaigns (RSA & PMAX)</p>
+<div x-data="{
+    isGenerating: false,
+    campaignType: '{{ old('campaign_type', '') }}',
+    keywords: '{{ old('target_keywords', '') }}',
+    get keywordArray() {
+        return this.keywords.split(',').map(k => k.trim()).filter(k => k.length > 0);
+    }
+}">
+    <div class="max-w-4xl">
+        <!-- Header Card -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-amber-100">
+                        <i class="fas fa-bullhorn text-xl text-amber-600"></i>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Crea Campaign Google Ads</h3>
+                    <p class="text-sm text-gray-600 mt-1">L'AI genererà asset pubblicitari ottimizzati per RSA o Performance Max</p>
+                </div>
+            </div>
         </div>
 
-        <form method="POST" action="{{ route('tenant.campaigns.store') }}">
+        <!-- Main Form -->
+        <form method="POST" action="{{ route('tenant.campaigns.store') }}" @submit="isGenerating = true" class="bg-white rounded-lg shadow-sm p-6">
             @csrf
 
             <!-- Campaign Name -->
             <div class="mb-6">
                 <label for="campaign_name" class="block text-sm font-medium text-gray-700 mb-2">
-                    Campaign Name <span class="text-red-500">*</span>
+                    Nome Campaign <span class="text-red-500">*</span>
                 </label>
                 <input
                     type="text"
                     id="campaign_name"
                     name="campaign_name"
                     value="{{ old('campaign_name') }}"
-                    class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                    placeholder="e.g., Summer Sale 2025 - Watches"
+                    class="w-full rounded-lg border-gray-300 focus:border-amber-500 focus:ring-amber-500"
+                    placeholder="es. Saldi Estivi 2025 - Orologi"
                     required
+                    :disabled="isGenerating"
                 >
                 @error('campaign_name')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -37,99 +54,176 @@
             <!-- Campaign Type -->
             <div class="mb-6">
                 <label for="campaign_type" class="block text-sm font-medium text-gray-700 mb-2">
-                    Campaign Type <span class="text-red-500">*</span>
+                    Tipo Campaign <span class="text-red-500">*</span>
                 </label>
                 <select
                     id="campaign_type"
                     name="campaign_type"
-                    class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    x-model="campaignType"
+                    class="w-full rounded-lg border-gray-300 focus:border-amber-500 focus:ring-amber-500"
                     required
+                    :disabled="isGenerating"
                 >
-                    <option value="">Select campaign type...</option>
-                    <option value="RSA" {{ old('campaign_type') === 'RSA' ? 'selected' : '' }}>RSA (Responsive Search Ads)</option>
-                    <option value="PMAX" {{ old('campaign_type') === 'PMAX' ? 'selected' : '' }}>PMAX (Performance Max)</option>
+                    <option value="">Seleziona tipo campaign...</option>
+                    <option value="RSA">RSA (Responsive Search Ads)</option>
+                    <option value="PMAX">PMAX (Performance Max)</option>
                 </select>
                 @error('campaign_type')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
-                <p class="mt-1 text-xs text-gray-500">
-                    RSA generates headlines and descriptions. PMAX generates comprehensive campaign assets.
-                </p>
+
+                <!-- Dynamic Type Info -->
+                <div x-show="campaignType === 'RSA'" x-transition class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-blue-500 mt-0.5 mr-2"></i>
+                        <p class="text-xs text-blue-700">
+                            <strong>RSA:</strong> Genera fino a 15 titoli (30 caratteri) e 4 descrizioni (90 caratteri) per annunci di ricerca dinamici.
+                        </p>
+                    </div>
+                </div>
+                <div x-show="campaignType === 'PMAX'" x-transition class="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-green-500 mt-0.5 mr-2"></i>
+                        <p class="text-xs text-green-700">
+                            <strong>PMAX:</strong> Genera titoli brevi (30 caratteri), titoli lunghi (90 caratteri) e descrizioni per campagne Performance Max multi-canale.
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <!-- Business Description -->
             <div class="mb-6">
                 <label for="business_description" class="block text-sm font-medium text-gray-700 mb-2">
-                    Business Description <span class="text-red-500">*</span>
+                    Descrizione Business <span class="text-red-500">*</span>
                 </label>
                 <textarea
                     id="business_description"
                     name="business_description"
-                    rows="4"
-                    class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                    placeholder="Describe your business, products, or services. Be specific about what makes you unique."
+                    rows="5"
+                    class="w-full rounded-lg border-gray-300 focus:border-amber-500 focus:ring-amber-500"
+                    placeholder="Descrivi il tuo business, prodotti o servizi. Sii specifico su cosa ti rende unico."
                     required
+                    :disabled="isGenerating"
                 >{{ old('business_description') }}</textarea>
                 @error('business_description')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
                 <p class="mt-1 text-xs text-gray-500">
-                    Example: "Luxury Swiss watches handmade by master craftsmen. Premium quality timepieces with lifetime warranty."
+                    <i class="fas fa-lightbulb mr-1"></i>Esempio: "Orologi svizzeri di lusso realizzati a mano da maestri artigiani. Segnatempo di qualità premium con garanzia a vita."
                 </p>
             </div>
 
             <!-- Target Keywords -->
             <div class="mb-6">
                 <label for="target_keywords" class="block text-sm font-medium text-gray-700 mb-2">
-                    Target Keywords <span class="text-red-500">*</span>
+                    Parole Chiave Target <span class="text-red-500">*</span>
                 </label>
                 <input
                     type="text"
                     id="target_keywords"
                     name="target_keywords"
-                    value="{{ old('target_keywords') }}"
-                    class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                    placeholder="e.g., swiss watches, luxury timepieces, handmade watches"
+                    x-model="keywords"
+                    class="w-full rounded-lg border-gray-300 focus:border-amber-500 focus:ring-amber-500"
+                    placeholder="es. orologi svizzeri, segnatempo lusso, orologi artigianali"
                     required
+                    :disabled="isGenerating"
                 >
                 @error('target_keywords')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
                 <p class="mt-1 text-xs text-gray-500">
-                    Separate multiple keywords with commas. These will be used to optimize the campaign content.
+                    Separa le parole chiave con virgole. Saranno usate per ottimizzare i contenuti della campaign.
+                </p>
+
+                <!-- Keywords Preview -->
+                <div x-show="keywordArray.length > 0" x-transition class="mt-3 flex flex-wrap gap-2">
+                    <template x-for="keyword in keywordArray" :key="keyword">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                            <i class="fas fa-tag mr-1 text-amber-500"></i>
+                            <span x-text="keyword"></span>
+                        </span>
+                    </template>
+                </div>
+            </div>
+
+            <!-- URL (Optional) -->
+            <div class="mb-6">
+                <label for="url" class="block text-sm font-medium text-gray-700 mb-2">
+                    URL Finale
+                </label>
+                <input
+                    type="url"
+                    id="url"
+                    name="url"
+                    value="{{ old('url', 'https://') }}"
+                    class="w-full rounded-lg border-gray-300 focus:border-amber-500 focus:ring-amber-500"
+                    placeholder="https://www.esempio.com"
+                    :disabled="isGenerating"
+                >
+                @error('url')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+                <p class="mt-1 text-xs text-gray-500">
+                    URL di destinazione per la campaign (opzionale)
                 </p>
             </div>
 
+            <!-- Language (Hidden, default IT) -->
+            <input type="hidden" name="language" value="it">
+
             <!-- Action Buttons -->
-            <div class="flex items-center justify-between pt-4 border-t">
-                <a href="{{ route('tenant.campaigns.index') }}" class="text-gray-600 hover:text-gray-800">
-                    <i class="fas fa-arrow-left mr-2"></i>Back to Campaigns
+            <div class="flex items-center justify-between pt-6 border-t">
+                <a href="{{ route('tenant.campaigns.index') }}"
+                   class="text-gray-600 hover:text-gray-900 font-medium"
+                   :class="{ 'pointer-events-none opacity-50': isGenerating }">
+                    <i class="fas fa-arrow-left mr-2"></i>Torna alle campaigns
                 </a>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
-                    <i class="fas fa-magic mr-2"></i>Generate Campaign
+
+                <button type="submit"
+                        class="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2.5 rounded-lg font-medium inline-flex items-center shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        :disabled="isGenerating">
+                    <span x-show="!isGenerating" class="inline-flex items-center">
+                        <i class="fas fa-magic mr-2"></i>Genera Campaign
+                    </span>
+                    <span x-show="isGenerating" class="inline-flex items-center">
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Generazione in corso...
+                    </span>
                 </button>
             </div>
         </form>
-    </div>
 
-    <!-- Info Box -->
-    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <i class="fas fa-info-circle text-blue-500"></i>
-            </div>
-            <div class="ml-3">
-                <h3 class="text-sm font-medium text-blue-800">How it works</h3>
-                <div class="mt-2 text-sm text-blue-700">
-                    <ul class="list-disc list-inside space-y-1">
-                        <li>AI generates optimized campaign assets based on your input</li>
-                        <li>RSA creates headlines and descriptions for search ads</li>
-                        <li>PMAX creates comprehensive assets for Performance Max campaigns</li>
-                        <li>All generated content is optimized for Google Ads best practices</li>
+        <!-- Info Box -->
+        <div class="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-5">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-lightbulb text-2xl text-amber-500"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-sm font-semibold text-amber-900 mb-2">Come Funziona</h3>
+                    <ul class="text-sm text-amber-800 space-y-1.5">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-amber-600 mr-2 mt-0.5"></i>
+                            <span>L'AI genera asset ottimizzati basandosi sui tuoi input</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-amber-600 mr-2 mt-0.5"></i>
+                            <span>RSA crea titoli e descrizioni per annunci di ricerca</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-amber-600 mr-2 mt-0.5"></i>
+                            <span>PMAX crea asset completi per campagne Performance Max</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-amber-600 mr-2 mt-0.5"></i>
+                            <span>Tutti i contenuti rispettano le best practice di Google Ads</span>
+                        </li>
                     </ul>
                 </div>
             </div>
-        </div>
         </div>
     </div>
 </div>

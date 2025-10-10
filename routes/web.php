@@ -127,6 +127,10 @@ Route::middleware(['auth', \App\Http\Middleware\CheckMaintenanceMode::class, \Ap
     Route::get('/campaigns/create', [\App\Http\Controllers\Tenant\CampaignGeneratorController::class, 'create'])->name('campaigns.create');
     Route::post('/campaigns', [\App\Http\Controllers\Tenant\CampaignGeneratorController::class, 'store'])->name('campaigns.store');
     Route::get('/campaigns/{id}', [\App\Http\Controllers\Tenant\CampaignGeneratorController::class, 'show'])->name('campaigns.show');
+    Route::get('/campaigns/{id}/edit', [\App\Http\Controllers\Tenant\CampaignGeneratorController::class, 'edit'])->name('campaigns.edit');
+    Route::put('/campaigns/{id}', [\App\Http\Controllers\Tenant\CampaignGeneratorController::class, 'update'])->name('campaigns.update');
+    Route::post('/campaigns/{id}/regenerate', [\App\Http\Controllers\Tenant\CampaignGeneratorController::class, 'regenerate'])->name('campaigns.regenerate');
+    Route::get('/campaigns/{id}/export/{format?}', [\App\Http\Controllers\Tenant\CampaignGeneratorController::class, 'export'])->name('campaigns.export');
     Route::delete('/campaigns/{id}', [\App\Http\Controllers\Tenant\CampaignGeneratorController::class, 'destroy'])->name('campaigns.destroy');
 });
 
