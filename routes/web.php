@@ -5,6 +5,11 @@ use App\Http\Controllers\TenantPageController;
 use App\Http\Controllers\TenantApiKeyController;
 use App\Http\Controllers\TenantPromptController;
 use App\Http\Controllers\TenantContentController;
+use App\Http\Controllers\CrewController;
+use App\Http\Controllers\CrewAgentController;
+use App\Http\Controllers\CrewTaskController;
+use App\Http\Controllers\CrewExecutionController;
+use App\Http\Controllers\CrewTemplateController;
 use App\Http\Controllers\TestOpenAIController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\Auth\EmailVerificationController;
@@ -132,6 +137,60 @@ Route::middleware(['auth', \App\Http\Middleware\CheckMaintenanceMode::class, \Ap
     Route::post('/campaigns/{id}/regenerate', [\App\Http\Controllers\Tenant\CampaignGeneratorController::class, 'regenerate'])->name('campaigns.regenerate');
     Route::get('/campaigns/{id}/export/{format?}', [\App\Http\Controllers\Tenant\CampaignGeneratorController::class, 'export'])->name('campaigns.export');
     Route::delete('/campaigns/{id}', [\App\Http\Controllers\Tenant\CampaignGeneratorController::class, 'destroy'])->name('campaigns.destroy');
+
+    // CrewAI Management routes
+    Route::prefix('crews')->name('crews.')->group(function () {
+        // Main crew CRUD
+        Route::get('/', [CrewController::class, 'index'])->name('index');
+        Route::get('/create', [CrewController::class, 'create'])->name('create');
+        Route::post('/', [CrewController::class, 'store'])->name('store');
+        Route::get('/{crew}', [CrewController::class, 'show'])->name('show');
+        Route::get('/{crew}/edit', [CrewController::class, 'edit'])->name('edit');
+        Route::put('/{crew}', [CrewController::class, 'update'])->name('update');
+        Route::delete('/{crew}', [CrewController::class, 'destroy'])->name('destroy');
+        Route::post('/{crew}/clone', [CrewController::class, 'clone'])->name('clone');
+
+        // Agent management (nested under crew)
+        Route::post('/{crew}/agents', [CrewAgentController::class, 'store'])->name('agents.store');
+        Route::put('/{crew}/agents/{agent}', [CrewAgentController::class, 'update'])->name('agents.update');
+        Route::delete('/{crew}/agents/{agent}', [CrewAgentController::class, 'destroy'])->name('agents.destroy');
+        Route::post('/{crew}/agents/reorder', [CrewAgentController::class, 'reorder'])->name('agents.reorder');
+
+        // Task management (nested under crew)
+        Route::post('/{crew}/tasks', [CrewTaskController::class, 'store'])->name('tasks.store');
+        Route::put('/{crew}/tasks/{task}', [CrewTaskController::class, 'update'])->name('tasks.update');
+        Route::delete('/{crew}/tasks/{task}', [CrewTaskController::class, 'destroy'])->name('tasks.destroy');
+        Route::post('/{crew}/tasks/reorder', [CrewTaskController::class, 'reorder'])->name('tasks.reorder');
+
+        // Crew execution
+        Route::post('/{crew}/execute', [CrewExecutionController::class, 'execute'])->name('execute');
+    });
+
+    // Crew Execution Management routes
+    Route::prefix('crew-executions')->name('crew-executions.')->group(function () {
+        Route::get('/', [CrewExecutionController::class, 'index'])->name('index');
+        Route::get('/{execution}', [CrewExecutionController::class, 'show'])->name('show');
+        Route::post('/{execution}/cancel', [CrewExecutionController::class, 'cancel'])->name('cancel');
+        Route::post('/{execution}/retry', [CrewExecutionController::class, 'retry'])->name('retry');
+        Route::get('/{execution}/logs', [CrewExecutionController::class, 'logs'])->name('logs');
+        Route::delete('/{execution}', [CrewExecutionController::class, 'destroy'])->name('destroy');
+    });
+
+    // Crew Template Management routes
+    Route::prefix('crew-templates')->name('crew-templates.')->group(function () {
+        Route::get('/', [CrewTemplateController::class, 'index'])->name('index');
+        Route::get('/create', [CrewTemplateController::class, 'create'])->name('create');
+        Route::post('/', [CrewTemplateController::class, 'store'])->name('store');
+        Route::get('/{template}', [CrewTemplateController::class, 'show'])->name('show');
+        Route::get('/{template}/edit', [CrewTemplateController::class, 'edit'])->name('edit');
+        Route::put('/{template}', [CrewTemplateController::class, 'update'])->name('update');
+        Route::delete('/{template}', [CrewTemplateController::class, 'destroy'])->name('destroy');
+        Route::post('/{template}/use', [CrewTemplateController::class, 'use'])->name('use');
+        Route::post('/{template}/publish', [CrewTemplateController::class, 'publish'])->name('publish');
+    });
+
+    // Crew Agent Tools API (for AJAX)
+    Route::get('/crew-agent-tools', [CrewAgentController::class, 'getAvailableTools'])->name('crew-agent-tools.index');
 });
 
 // API Documentation
