@@ -58,7 +58,7 @@ class CampaignGeneratorController extends Controller
             'type' => strtolower($validated['campaign_type']),
             'info' => $validated['business_description'],
             'keywords' => $validated['target_keywords'],
-            'language' => 'en', // Changed from 'it' to 'en'
+            'language' => 'it', // Italian language for campaigns
             'url' => $request->input('url', 'https://example.com'),
         ]);
 
