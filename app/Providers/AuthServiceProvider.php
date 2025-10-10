@@ -14,6 +14,14 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         \App\Models\AdvCampaign::class => \App\Policies\AdvCampaignPolicy::class,
+        \App\Models\Page::class => \App\Policies\PagePolicy::class,
+        \App\Models\Prompt::class => \App\Policies\PromptPolicy::class,
+        \App\Models\ContentGeneration::class => \App\Policies\ContentGenerationPolicy::class,
+        \App\Models\ApiKey::class => \App\Policies\ApiKeyPolicy::class,
+        \App\Models\Content::class => \App\Policies\ContentPolicy::class,
+        \App\Models\Crew::class => \App\Policies\CrewPolicy::class,
+        \App\Models\CmsConnection::class => \App\Policies\CmsConnectionPolicy::class,
+        \App\Models\Tenant::class => \App\Policies\TenantPolicy::class,
     ];
 
     /**
