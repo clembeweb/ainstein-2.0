@@ -21,6 +21,11 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\ApiCors::class,
         ]);
 
+        // Add token validation middleware for API routes
+        $middleware->api(append: [
+            \App\Http\Middleware\EnsureTokenIsValid::class,
+        ]);
+
         // Temporarily exclude login and register from CSRF protection for testing
         $middleware->validateCsrfTokens(except: [
             'login',

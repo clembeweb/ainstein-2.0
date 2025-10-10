@@ -34,8 +34,8 @@ class AuthController extends Controller
         // Update last login
         $user->update(['last_login' => now()]);
 
-        // Create token
-        $token = $user->createToken('api-token')->plainTextToken;
+        // Create token with explicit expiration (24 hours)
+        $token = $user->createToken('api-token', ['*'], now()->addHours(24))->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful',
@@ -56,7 +56,8 @@ class AuthController extends Controller
         unset($data['password'], $data['password_confirmation']);
 
         $user = User::create($data);
-        $token = $user->createToken('api-token')->plainTextToken;
+        // Create token with explicit expiration (24 hours)
+        $token = $user->createToken('api-token', ['*'], now()->addHours(24))->plainTextToken;
 
         return response()->json([
             'message' => 'Registration successful',

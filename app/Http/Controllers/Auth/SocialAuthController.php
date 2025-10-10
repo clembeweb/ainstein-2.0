@@ -242,8 +242,8 @@ class SocialAuthController extends Controller
                 $this->emailService->sendWelcomeEmail($user, $user->tenant);
             }
 
-            // Generate API token
-            $token = $user->createToken('social-auth', ['*'])->plainTextToken;
+            // Generate API token with explicit expiration (24 hours)
+            $token = $user->createToken('social-auth', ['*'], now()->addHours(24))->plainTextToken;
 
             return response()->json([
                 'message' => $existingUser ? 'Login successful' : 'Account created successfully',
