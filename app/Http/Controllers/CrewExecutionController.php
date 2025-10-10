@@ -93,6 +93,7 @@ class CrewExecutionController extends Controller
             'input_variables' => 'nullable|array',
             'input_variables.*' => 'string|max:2000',
             'use_mock' => 'nullable|boolean',
+            'mode' => 'nullable|string|in:mock,real',
         ]);
 
         if ($validator->fails()) {
@@ -106,6 +107,11 @@ class CrewExecutionController extends Controller
         }
 
         try {
+            // Determine if mock mode (support both 'use_mock' boolean and 'mode' string)
+            $useMock = $request->has('mode')
+                ? $request->input('mode') === 'mock'
+                : $request->boolean('use_mock', false);
+
             // Create execution record
             $execution = CrewExecution::create([
                 'tenant_id' => $user->tenant_id,
@@ -120,16 +126,17 @@ class CrewExecutionController extends Controller
                 'execution_id' => $execution->id,
                 'crew_id' => $crew->id,
                 'user_id' => $user->id,
-                'use_mock' => $request->boolean('use_mock', false)
+                'use_mock' => $useMock
             ]);
 
             // Dispatch job to execute crew
-            $useMock = $request->boolean('use_mock', false);
             ExecuteCrewJob::dispatch($execution, $useMock);
 
             if ($request->expectsJson()) {
                 return response()->json([
+                    'success' => true,
                     'message' => 'Crew execution started',
+                    'execution_url' => route('tenant.crew-executions.show', $execution),
                     'data' => $execution->load(['crew'])
                 ], 201);
             }
@@ -225,6 +232,7 @@ class CrewExecutionController extends Controller
 
             if (request()->expectsJson()) {
                 return response()->json([
+                    'success' => true,
                     'message' => 'Execution cancelled successfully'
                 ]);
             }
@@ -303,7 +311,9 @@ class CrewExecutionController extends Controller
 
             if (request()->expectsJson()) {
                 return response()->json([
+                    'success' => true,
                     'message' => 'Execution retried successfully',
+                    'execution_url' => route('tenant.crew-executions.show', $newExecution),
                     'data' => $newExecution->load(['crew'])
                 ], 201);
             }
@@ -345,7 +355,9 @@ class CrewExecutionController extends Controller
             ->get();
 
         return response()->json([
+            'success' => true,
             'data' => [
+                'status' => $execution->status,
                 'execution' => [
                     'id' => $execution->id,
                     'status' => $execution->status,

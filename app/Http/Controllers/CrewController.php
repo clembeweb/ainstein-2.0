@@ -209,7 +209,10 @@ class CrewController extends Controller
             ]);
         }
 
-        return view('tenant.crews.show', compact('crew'));
+        // Check if OpenAI API key is configured
+        $openAiConfigured = !empty(\App\Models\PlatformSetting::get('openai_api_key'));
+
+        return view('tenant.crews.show', compact('crew', 'openAiConfigured'));
     }
 
     /**

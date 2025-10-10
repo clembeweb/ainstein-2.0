@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\Crew;
 use App\Models\CrewExecution;
 use App\Models\CrewExecutionLog;
 use App\Models\PlatformSetting;
@@ -12,10 +13,11 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Spatie\Multitenancy\Jobs\TenantAware;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
-class ExecuteCrewJob implements ShouldQueue
+class ExecuteCrewJob implements ShouldQueue, TenantAware
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -33,6 +35,14 @@ class ExecuteCrewJob implements ShouldQueue
     {
         $this->execution = $execution;
         $this->useMockService = $useMockService;
+    }
+
+    /**
+     * Get tenant ID for multitenancy support.
+     */
+    public function getTenantId(): ?string
+    {
+        return $this->execution->tenant_id;
     }
 
     /**
