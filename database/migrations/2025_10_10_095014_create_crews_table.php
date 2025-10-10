@@ -20,6 +20,14 @@ return new class extends Migration
             $table->enum('process_type', ['sequential', 'hierarchical'])->default('sequential');
             $table->enum('status', ['draft', 'active', 'archived'])->default('draft')->index();
             $table->json('configuration')->nullable();
+
+            // Execution statistics
+            $table->integer('total_executions')->default(0);
+            $table->integer('successful_executions')->default(0);
+            $table->integer('failed_executions')->default(0);
+            $table->integer('average_execution_time')->default(0); // In seconds
+            $table->timestamp('last_execution_at')->nullable();
+
             $table->timestamps();
             $table->softDeletes();
 

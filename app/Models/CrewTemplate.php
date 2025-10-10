@@ -13,6 +13,7 @@ class CrewTemplate extends Model
 
     protected $fillable = [
         'tenant_id',
+        'crew_id',
         'created_by',
         'name',
         'description',
@@ -20,6 +21,7 @@ class CrewTemplate extends Model
         'crew_configuration',
         'is_system',
         'is_public',
+        'is_active',
         'usage_count',
         'rating',
     ];
@@ -28,6 +30,7 @@ class CrewTemplate extends Model
         'crew_configuration' => 'array',
         'is_system' => 'boolean',
         'is_public' => 'boolean',
+        'is_active' => 'boolean',
         'usage_count' => 'integer',
         'rating' => 'decimal:2',
     ];
@@ -38,6 +41,14 @@ class CrewTemplate extends Model
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    /**
+     * Get the crew this template references.
+     */
+    public function crew(): BelongsTo
+    {
+        return $this->belongsTo(Crew::class);
     }
 
     /**

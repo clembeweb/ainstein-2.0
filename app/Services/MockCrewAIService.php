@@ -458,7 +458,7 @@ This task has been completed with attention to detail and alignment with project
     private function createLog(CrewExecution $execution, string $level, string $message, array $data = []): void
     {
         CrewExecutionLog::create([
-            'execution_id' => $execution->id,
+            'crew_execution_id' => $execution->id,
             'level' => $level,
             'message' => $message,
             'data' => $data,

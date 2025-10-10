@@ -14,13 +14,15 @@ return new class extends Migration
         Schema::create('crew_templates', function (Blueprint $table) {
             $table->string('id')->primary(); // ULID
             $table->string('tenant_id')->nullable()->index(); // Null for system templates
+            $table->string('crew_id')->nullable(); // Reference crew for cloning
             $table->string('created_by')->nullable();
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('category')->nullable()->index(); // content, research, analysis, etc.
-            $table->json('crew_configuration'); // Full crew configuration to clone
+            $table->json('crew_configuration')->nullable(); // Full crew configuration to clone (optional if crew_id is provided)
             $table->boolean('is_system')->default(false)->index(); // System vs user templates
             $table->boolean('is_public')->default(false)->index(); // Shareable templates
+            $table->boolean('is_active')->default(true);
             $table->integer('usage_count')->default(0);
             $table->decimal('rating', 3, 2)->default(0); // 0.00 to 5.00
             $table->timestamps();
@@ -28,6 +30,7 @@ return new class extends Migration
 
             // Foreign keys
             $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
+            $table->foreign('crew_id')->references('id')->on('crews')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
 
             // Composite indexes for performance
