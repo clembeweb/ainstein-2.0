@@ -20,6 +20,10 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\ApiKey::class => \App\Policies\ApiKeyPolicy::class,
         \App\Models\Content::class => \App\Policies\ContentPolicy::class,
         \App\Models\Crew::class => \App\Policies\CrewPolicy::class,
+        \App\Models\CrewAgent::class => \App\Policies\CrewAgentPolicy::class,
+        \App\Models\CrewTask::class => \App\Policies\CrewTaskPolicy::class,
+        \App\Models\CrewExecution::class => \App\Policies\CrewExecutionPolicy::class,
+        \App\Models\CrewTemplate::class => \App\Policies\CrewTemplatePolicy::class,
         \App\Models\CmsConnection::class => \App\Policies\CmsConnectionPolicy::class,
         \App\Models\Tenant::class => \App\Policies\TenantPolicy::class,
     ];
