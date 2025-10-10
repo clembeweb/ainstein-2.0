@@ -1,0 +1,12 @@
+# CrewAI Core (will install all required dependencies)
+crewai>=0.28.8
+crewai-tools>=0.2.6
+
+# Database connectivity
+pymysql>=1.1.0
+
+# HTTP requests for Laravel API
+requests>=2.31.0
+
+# Logging
+python-json-logger>=2.0.7
