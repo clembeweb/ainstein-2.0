@@ -11,18 +11,25 @@ Ainstein is a powerful multi-tenant SaaS platform that leverages AI to generate 
 ### Core Features
 - **AI Content Generation**: Generate articles, blog posts, and marketing copy using OpenAI's GPT models
 - **Multi-Tenancy**: Complete tenant isolation with individual databases or shared database with tenant scoping
+- **OAuth Social Login**: Multi-tenant OAuth authentication with Google and Facebook support
 - **SEO Optimization**: Automatic generation of SEO-friendly titles and meta descriptions
 - **Custom Prompts**: Create and manage custom prompt templates for specific content needs
 - **Multi-Language Support**: Generate content in multiple languages
 - **Queue System**: Background processing for AI content generation
 - **Token Management**: Track and manage OpenAI API token usage per tenant
 
+### 🆕 New Features (Ready for Deployment)
+- **CrewAI Integration**: Advanced AI agent orchestration system with workflow management
+- **SEO Audit Agent**: Comprehensive SEO analysis and reporting tools
+- **Campaign Generator**: Google Ads RSA and PMAX campaign generation with Italian language support
+
 ### Admin Features
 - **Super Admin Dashboard**: Comprehensive admin panel built with Filament
 - **Tenant Management**: Create, manage, and monitor tenant accounts
+- **OAuth Configuration**: Per-tenant OAuth provider configuration with encryption
 - **User Management**: Role-based access control with admin, tenant admin, and user roles
 - **System Analytics**: Monitor platform usage, token consumption, and performance metrics
-- **Platform Settings**: Configure OpenAI API keys, models, and system-wide settings
+- **Platform Settings**: Configure OpenAI API keys, OAuth providers, and system-wide settings
 
 ### API Features
 - **RESTful API**: Complete API for all platform features
@@ -143,9 +150,51 @@ Default super admin credentials:
      -d '{"page_id":"PAGE_ID","prompt_type":"article"}'
    ```
 
+## 🔐 OAuth Social Login
+
+### Features
+- **Two-Level Configuration System**: Super Admin global settings with per-tenant override capability
+- **Multi-Tenant OAuth**: Each tenant can configure their own OAuth providers
+- **Supported Providers**: Google and Facebook authentication
+- **Encrypted Storage**: All OAuth credentials are encrypted in the database
+- **Separated Configurations**: Distinct settings for Social Login vs API Integrations
+- **Easy Configuration**: Simple UI with separate tabs in admin panel
+
+### Configuration Levels
+
+1. **Super Admin Level** (Global Fallback)
+   - Access via `/admin` → Platform Settings → Social Login tab
+   - Configure global OAuth credentials for all tenants
+   - Separate from API Integration credentials
+
+2. **Tenant Level** (Override)
+   - Each tenant can override with their own OAuth credentials
+   - Access via tenant dashboard → Settings → OAuth Settings
+   - Takes priority over global settings
+
+### Setup OAuth
+See [OAuth Setup Guide](docs/oauth/OAUTH_SETUP_GUIDE.md) for detailed configuration instructions.
+
+Quick setup:
+1. **Super Admin**: Configure global OAuth in Platform Settings → Social Login tab
+2. **Tenant Admin**: Optionally override in tenant Settings → OAuth Settings
+3. Add Client ID and Client Secret for Google/Facebook
+4. Test the configuration with the built-in testing tool
+5. Enable the providers for user authentication
+
 ## 🚀 Deployment
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
+### Current Status
+🔄 **Production Deployment in Progress**
+- Server: ainstein.it (135.181.42.233)
+- Status: Login fix applied, testing in progress
+- See [DEPLOYMENT_STATUS.md](DEPLOYMENT_STATUS.md) for real-time updates
+
+### Documentation
+- [DEPLOYMENT_STATUS.md](DEPLOYMENT_STATUS.md) - Current deployment status and progress
+- [DEPLOYMENT.md](DEPLOYMENT.md) - Deployment instructions
+- [DEPLOYMENT_ACTIONS_LOG.md](DEPLOYMENT_ACTIONS_LOG.md) - Detailed action log
+- [docs/deployment/](docs/deployment/) - All deployment documentation
 
 ### Quick Deploy
 ```bash

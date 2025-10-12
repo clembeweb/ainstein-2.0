@@ -34,7 +34,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Platform Settings
     Route::get('/settings', [\App\Http\Controllers\Admin\PlatformSettingsController::class, 'index'])->name('settings.index');
 
-    // OAuth Settings
+    // Social Login Settings
+    Route::post('/settings/social', [\App\Http\Controllers\Admin\PlatformSettingsController::class, 'updateSocialLogin'])->name('settings.social.update');
+
+    // OAuth Settings (API Integrations)
     Route::post('/settings/oauth', [\App\Http\Controllers\Admin\PlatformSettingsController::class, 'updateOAuth'])->name('settings.oauth.update');
 
     // OpenAI Settings

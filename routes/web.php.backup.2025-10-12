@@ -22,19 +22,19 @@ Route::get('/', function () {
     return view('landing');
 })->middleware(\App\Http\Middleware\CheckMaintenanceMode::class);
 
-// Authentication routes (with rate limiting for security)
+// Authentication routes
 Route::get('/login', [App\Http\Controllers\Auth\AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [App\Http\Controllers\Auth\AuthController::class, 'login'])->middleware('throttle:5,1'); // 5 attempts per minute
+Route::post('/login', [App\Http\Controllers\Auth\AuthController::class, 'login']);
 Route::get('/register', [App\Http\Controllers\Auth\AuthController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [App\Http\Controllers\Auth\AuthController::class, 'register'])->middleware('throttle:5,1'); // 5 attempts per minute
+Route::post('/register', [App\Http\Controllers\Auth\AuthController::class, 'register']);
 Route::post('/logout', [App\Http\Controllers\Auth\AuthController::class, 'logout'])->name('logout');
 
-// Password Reset routes (with rate limiting for security)
+// Password Reset routes
 Route::prefix('password')->group(function () {
     Route::get('/reset', [PasswordResetController::class, 'showLinkRequestForm'])->name('password.request');
-    Route::post('/email', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email')->middleware('throttle:3,1'); // 3 attempts per minute
+    Route::post('/email', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email');
     Route::get('/reset/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
-    Route::post('/reset', [PasswordResetController::class, 'reset'])->name('password.update')->middleware('throttle:5,1'); // 5 attempts per minute
+    Route::post('/reset', [PasswordResetController::class, 'reset'])->name('password.update');
 });
 
 // Email Verification routes
@@ -208,18 +208,15 @@ Route::get('/api/docs', function () {
     return view('api.docs');
 })->name('api.docs');
 
-// OpenAI Service Testing - DISABLED IN PRODUCTION FOR SECURITY
-// Uncomment only in local/development environment
-// if (app()->environment('local')) {
-//     Route::prefix('test-openai')->group(function () {
-//         Route::get('/', [TestOpenAIController::class, 'index']);
-//         Route::post('/chat', [TestOpenAIController::class, 'testChat']);
-//         Route::post('/completion', [TestOpenAIController::class, 'testCompletion']);
-//         Route::post('/json', [TestOpenAIController::class, 'testJSON']);
-//         Route::post('/embeddings', [TestOpenAIController::class, 'testEmbeddings']);
-//         Route::post('/error', [TestOpenAIController::class, 'testError']);
-//     });
-// }
+// OpenAI Service Testing (for development/testing only)
+Route::prefix('test-openai')->group(function () {
+    Route::get('/', [TestOpenAIController::class, 'index']);
+    Route::post('/chat', [TestOpenAIController::class, 'testChat']);
+    Route::post('/completion', [TestOpenAIController::class, 'testCompletion']);
+    Route::post('/json', [TestOpenAIController::class, 'testJSON']);
+    Route::post('/embeddings', [TestOpenAIController::class, 'testEmbeddings']);
+    Route::post('/error', [TestOpenAIController::class, 'testError']);
+});
 
 // Public routes
 Route::get('/health', function () {

@@ -390,6 +390,76 @@ class OpenAIService
 
         // If JSON mode is requested, return valid JSON
         if (isset($options['json_mode']) && $options['json_mode']) {
+            // Check for campaign-specific prompts
+            $promptLower = strtolower($prompt);
+
+            if (str_contains($promptLower, 'rsa') || str_contains($promptLower, 'responsive search ads')) {
+                // Return RSA mock data
+                return [
+                    'content' => json_encode([
+                        'titles' => [
+                            "Soluzioni Premium di Qualità",
+                            "Offerte Esclusive per Te",
+                            "Innovazione al Tuo Servizio",
+                            "Qualità Garantita al 100%",
+                            "Promozione Speciale Limitata",
+                            "Esperienza Unica Garantita",
+                            "Servizio Clienti Eccellente",
+                            "Risparmia Oggi - Offerta Spec",
+                            "Leader nel Settore dal 2024",
+                            "Consegna Rapida Garantita",
+                            "Prezzi Imbattibili Online",
+                            "Soddisfazione Garantita",
+                            "Prodotti di Alta Qualità",
+                            "Offerta Esclusiva Online",
+                            "Scopri le Nostre Novità"
+                        ],
+                        'descriptions' => [
+                            "Scopri la nostra gamma completa di prodotti e servizi di alta qualità. Offerte esclusive e promozioni speciali.",
+                            "Qualità superiore e prezzi competitivi. Servizio clienti dedicato e consegna rapida in tutta Italia.",
+                            "Leader nel settore con anni di esperienza. Soluzioni innovative per ogni esigenza. Contattaci ora!",
+                            "Garanzia di soddisfazione al 100%. Prodotti certificati e servizio post-vendita eccellente."
+                        ]
+                    ]),
+                    'tokens_used' => 150,
+                    'model' => $model ?? 'gpt-4o-mini',
+                    'finish_reason' => 'stop',
+                    'success' => true,
+                ];
+            } elseif (str_contains($promptLower, 'pmax') || str_contains($promptLower, 'performance max')) {
+                // Return PMAX mock data
+                return [
+                    'content' => json_encode([
+                        'short_titles' => [
+                            "Qualità Premium Garantita",
+                            "Offerte Esclusive Online",
+                            "Innovazione e Tecnologia",
+                            "Servizio Clienti Top",
+                            "Promozioni Imperdibili"
+                        ],
+                        'long_titles' => [
+                            "Scopri la Nostra Gamma Completa di Prodotti e Servizi di Alta Qualità",
+                            "Soluzioni Innovative per Ogni Esigenza - Qualità e Convenienza Garantite",
+                            "Leader nel Settore con Anni di Esperienza - Affidabilità e Professionalità",
+                            "Offerte Esclusive e Promozioni Speciali - Risparmia Oggi con Noi",
+                            "Tecnologia Avanzata e Servizio Clienti Eccellente - La Tua Scelta Migliore"
+                        ],
+                        'descriptions' => [
+                            "Scopri la qualità superiore dei nostri prodotti e servizi. Offerte esclusive, consegna rapida e assistenza dedicata.",
+                            "Leader nel settore con soluzioni innovative per ogni esigenza. Qualità certificata e prezzi competitivi garantiti.",
+                            "Esperienza e professionalità al tuo servizio. Prodotti di alta qualità e servizio clienti eccellente. Contattaci ora!",
+                            "Promozioni speciali e offerte limitate. Garanzia di soddisfazione e assistenza post-vendita dedicata. Ordina oggi!",
+                            "Innovazione e tecnologia avanzata per risultati superiori. Affidabilità garantita e supporto completo sempre."
+                        ]
+                    ]),
+                    'tokens_used' => 200,
+                    'model' => $model ?? 'gpt-4o-mini',
+                    'finish_reason' => 'stop',
+                    'success' => true,
+                ];
+            }
+
+            // Generic JSON mock
             return [
                 'content' => json_encode([
                     'result' => 'Mock JSON response',

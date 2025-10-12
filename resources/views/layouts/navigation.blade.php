@@ -23,6 +23,10 @@
                         {{ __('Campaigns') }}
                     </x-nav-link>
 
+                    <x-nav-link href="{{ route('tenant.crews.index') }}" :active="request()->routeIs('tenant.crews.*')">
+                        {{ __('CrewAI') }}
+                    </x-nav-link>
+
                     <x-nav-link href="{{ route('tenant.api-keys.index') }}" :active="request()->routeIs('tenant.api-keys.*')">
                         {{ __('API Keys') }}
                     </x-nav-link>
@@ -104,6 +108,10 @@
 
             <x-responsive-nav-link href="{{ route('tenant.campaigns.index') }}" :active="request()->routeIs('tenant.campaigns.*')">
                 {{ __('Campaigns') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link href="{{ route('tenant.crews.index') }}" :active="request()->routeIs('tenant.crews.*')">
+                {{ __('CrewAI') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link href="{{ route('tenant.api-keys.index') }}" :active="request()->routeIs('tenant.api-keys.*')">

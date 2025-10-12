@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Tenant;
 use App\Services\EmailService;
+use App\Services\TenantOAuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -16,10 +17,12 @@ use Illuminate\Support\Facades\DB;
 class SocialAuthController extends Controller
 {
     protected $emailService;
+    protected $oauthService;
 
-    public function __construct(EmailService $emailService)
+    public function __construct(EmailService $emailService, TenantOAuthService $oauthService)
     {
         $this->emailService = $emailService;
+        $this->oauthService = $oauthService;
     }
     /**
      * Redirect the user to the provider authentication page.
@@ -31,10 +34,18 @@ class SocialAuthController extends Controller
         }
 
         try {
+            // Configure Socialite dynamically based on tenant or global settings
+            $configured = $this->oauthService->configureSocialiteForTenant($provider);
+
+            if (!$configured) {
+                Log::warning("OAuth provider {$provider} not configured");
+                return redirect('/login')->with('error', 'Social login is not configured. Please contact your administrator.');
+            }
+
             return Socialite::driver($provider)->redirect();
         } catch (\Exception $e) {
             Log::error("Social auth redirect error for {$provider}: " . $e->getMessage());
-            return redirect('/')->with('error', 'Authentication service temporarily unavailable');
+            return redirect('/login')->with('error', 'Authentication service temporarily unavailable');
         }
     }
 
@@ -48,6 +59,14 @@ class SocialAuthController extends Controller
         }
 
         try {
+            // Configure Socialite dynamically for callback
+            $configured = $this->oauthService->configureSocialiteForTenant($provider);
+
+            if (!$configured) {
+                Log::warning("OAuth provider {$provider} not configured for callback");
+                return redirect('/login')->with('error', 'Social login configuration error.');
+            }
+
             $socialUser = Socialite::driver($provider)->user();
 
             // Check if user already exists with this email

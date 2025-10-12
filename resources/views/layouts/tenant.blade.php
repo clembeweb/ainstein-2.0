@@ -44,6 +44,11 @@
                     API Keys
                 </a>
 
+                <a href="{{ route('tenant.settings.oauth.index') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-amber-50 hover:text-amber-600 {{ request()->routeIs('tenant.settings.oauth.*') ? 'bg-amber-50 text-amber-600 border-r-2 border-amber-600' : '' }}">
+                    <i class="fas fa-users-cog mr-3"></i>
+                    OAuth Settings
+                </a>
+
                 <a href="{{ route('tenant.settings') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-amber-50 hover:text-amber-600 {{ request()->routeIs('tenant.settings') ? 'bg-amber-50 text-amber-600 border-r-2 border-amber-600' : '' }}">
                     <i class="fas fa-cog mr-3"></i>
                     Settings

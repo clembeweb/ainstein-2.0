@@ -25,6 +25,44 @@ class PlatformSettingsController extends Controller
         ]);
     }
 
+    public function updateSocialLogin(Request $request)
+    {
+        $request->validate([
+            'google_social_client_id' => 'nullable|string',
+            'google_social_client_secret' => 'nullable|string',
+            'facebook_social_app_id' => 'nullable|string',
+            'facebook_social_app_secret' => 'nullable|string',
+        ]);
+
+        $setting = PlatformSetting::first();
+        if (!$setting) {
+            $setting = new PlatformSetting();
+            $setting->save();
+        }
+
+        // Only update fields that were provided (not empty)
+        $updates = [];
+        if ($request->filled('google_social_client_id')) {
+            $updates['google_social_client_id'] = $request->google_social_client_id;
+        }
+        if ($request->filled('google_social_client_secret')) {
+            $updates['google_social_client_secret'] = $request->google_social_client_secret;
+        }
+        if ($request->filled('facebook_social_app_id')) {
+            $updates['facebook_social_app_id'] = $request->facebook_social_app_id;
+        }
+        if ($request->filled('facebook_social_app_secret')) {
+            $updates['facebook_social_app_secret'] = $request->facebook_social_app_secret;
+        }
+
+        if (!empty($updates)) {
+            $setting->update($updates);
+        }
+
+        return redirect()->route('admin.settings.index')
+            ->with('success', 'Social login settings updated successfully!');
+    }
+
     public function updateOAuth(Request $request)
     {
         $request->validate([
@@ -49,7 +87,7 @@ class PlatformSettingsController extends Controller
         ]));
 
         return redirect()->route('admin.settings.index')
-            ->with('success', 'OAuth settings updated successfully!');
+            ->with('success', 'API integration settings updated successfully!');
     }
 
     public function updateOpenAI(Request $request)

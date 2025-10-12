@@ -100,7 +100,12 @@
             </form>
 
             <!-- Social Login -->
-            @if(platform_setting('google_console_client_id') || platform_setting('facebook_app_id'))
+            @php
+                $oauthService = app(\App\Services\TenantOAuthService::class);
+                $availableProviders = $oauthService->getAvailableProviders(null);
+            @endphp
+
+            @if(count($availableProviders) > 0)
             <div class="mt-6">
                 <div class="relative">
                     <div class="absolute inset-0 flex items-center">
@@ -111,8 +116,8 @@
                     </div>
                 </div>
 
-                <div class="mt-6 grid grid-cols-2 gap-3">
-                    @if(platform_setting('google_console_client_id'))
+                <div class="mt-6 grid grid-cols-{{ count($availableProviders) }} gap-3">
+                    @if(in_array('google', $availableProviders))
                     <a href="{{ route('social.redirect', 'google') }}"
                        class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                         <i class="fab fa-google text-red-500"></i>
@@ -120,7 +125,7 @@
                     </a>
                     @endif
 
-                    @if(platform_setting('facebook_app_id'))
+                    @if(in_array('facebook', $availableProviders))
                     <a href="{{ route('social.redirect', 'facebook') }}"
                        class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                         <i class="fab fa-facebook text-blue-600"></i>

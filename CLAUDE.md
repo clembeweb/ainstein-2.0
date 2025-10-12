@@ -1,0 +1,1 @@
+- Chiedi sempre all'orchestratore come fare e quali agenti usare per ogni attività

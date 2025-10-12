@@ -134,6 +134,11 @@ class Tenant extends Model
         return $this->hasMany(CrewTemplate::class);
     }
 
+    public function oauthProviders(): HasMany
+    {
+        return $this->hasMany(TenantOAuthProvider::class);
+    }
+
     // Scopes
     public function scopeActive($query)
     {

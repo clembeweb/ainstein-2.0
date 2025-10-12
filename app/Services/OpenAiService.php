@@ -302,4 +302,131 @@ class OpenAiService
             throw new Exception('Content generation failed: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Parse JSON response from OpenAI
+     * Used by CampaignAssetsGenerator for structured data
+     */
+    public function parseJSON(string $prompt, array $variables = []): array
+    {
+        // If using mock service, delegate to it
+        if ($this->useMock) {
+            $result = $this->mockService->generateContent($prompt, $variables);
+
+            // Parse JSON if the result is a string
+            if (is_string($result['content'])) {
+                $parsed = json_decode($result['content'], true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    return $parsed;
+                }
+            }
+
+            // Return mock data structure for campaigns
+            if (stripos($prompt, 'rsa') !== false) {
+                return [
+                    'titles' => [
+                        "Soluzioni Premium di Qualità",
+                        "Offerte Esclusive per Te",
+                        "Innovazione al Tuo Servizio",
+                        "Qualità Garantita al 100%",
+                        "Promozione Speciale Limitata",
+                        "Esperienza Unica Garantita",
+                        "Servizio Clienti Eccellente",
+                        "Risparmia Oggi - Offerta Spec",
+                        "Leader nel Settore dal 2024",
+                        "Consegna Rapida Garantita",
+                        "Prezzi Imbattibili Online",
+                        "Soddisfazione Garantita",
+                        "Prodotti di Alta Qualità",
+                        "Offerta Esclusiva Online",
+                        "Scopri le Nostre Novità"
+                    ],
+                    'descriptions' => [
+                        "Scopri la nostra gamma completa di prodotti e servizi di alta qualità. Offerte esclusive e promozioni speciali.",
+                        "Qualità superiore e prezzi competitivi. Servizio clienti dedicato e consegna rapida in tutta Italia.",
+                        "Leader nel settore con anni di esperienza. Soluzioni innovative per ogni esigenza. Contattaci ora!",
+                        "Garanzia di soddisfazione al 100%. Prodotti certificati e servizio post-vendita eccellente."
+                    ]
+                ];
+            } elseif (stripos($prompt, 'pmax') !== false) {
+                return [
+                    'titles' => [
+                        "Qualità Premium Garantita",
+                        "Offerte Esclusive Online",
+                        "Innovazione e Tecnologia",
+                        "Servizio Clienti Top",
+                        "Promozioni Imperdibili"
+                    ],
+                    'long_titles' => [
+                        "Scopri la Nostra Gamma Completa di Prodotti e Servizi di Alta Qualità",
+                        "Soluzioni Innovative per Ogni Esigenza - Qualità e Convenienza Garantite",
+                        "Leader nel Settore con Anni di Esperienza - Affidabilità e Professionalità",
+                        "Offerte Esclusive e Promozioni Speciali - Risparmia Oggi con Noi",
+                        "Tecnologia Avanzata e Servizio Clienti Eccellente - La Tua Scelta Migliore"
+                    ],
+                    'descriptions' => [
+                        "Scopri la qualità superiore dei nostri prodotti e servizi. Offerte esclusive, consegna rapida e assistenza dedicata.",
+                        "Leader nel settore con soluzioni innovative per ogni esigenza. Qualità certificata e prezzi competitivi garantiti.",
+                        "Esperienza e professionalità al tuo servizio. Prodotti di alta qualità e servizio clienti eccellente. Contattaci ora!",
+                        "Promozioni speciali e offerte limitate. Garanzia di soddisfazione e assistenza post-vendita dedicata. Ordina oggi!",
+                        "Innovazione e tecnologia avanzata per risultati superiori. Affidabilità garantita e supporto completo sempre."
+                    ]
+                ];
+            }
+
+            return [];
+        }
+
+        try {
+            // Process prompt with variables
+            $processedPrompt = $this->processPromptVariables($prompt, $variables);
+
+            // Add JSON formatting instruction
+            $jsonPrompt = $processedPrompt . "\n\nIMPORTANT: Return only valid JSON without any additional text or markdown formatting.";
+
+            // Get settings from database with fallback to defaults
+            $maxTokens = PlatformSetting::get('openai_max_tokens', 2000);
+            $temperature = PlatformSetting::get('openai_temperature', 0.3); // Lower temperature for structured output
+
+            $response = $this->client->chat()->create([
+                'model' => $this->model,
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'You are an API that returns only valid JSON responses. Do not include any explanatory text or markdown formatting.'
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => $jsonPrompt
+                    ]
+                ],
+                'max_tokens' => $maxTokens,
+                'temperature' => $temperature,
+            ]);
+
+            $content = $response->choices[0]->message->content ?? '{}';
+
+            // Clean the response (remove potential markdown formatting)
+            $content = preg_replace('/^```json\s*/', '', $content);
+            $content = preg_replace('/\s*```$/', '', $content);
+            $content = trim($content);
+
+            // Parse JSON
+            $parsed = json_decode($content, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                Log::error('Failed to parse JSON from OpenAI', [
+                    'content' => $content,
+                    'error' => json_last_error_msg()
+                ]);
+                throw new Exception('Failed to parse JSON response: ' . json_last_error_msg());
+            }
+
+            return $parsed;
+
+        } catch (Exception $e) {
+            Log::error('OpenAI JSON parsing failed: ' . $e->getMessage());
+            throw new Exception('JSON parsing failed: ' . $e->getMessage());
+        }
+    }
 }

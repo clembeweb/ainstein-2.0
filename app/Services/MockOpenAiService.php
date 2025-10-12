@@ -81,6 +81,15 @@ class MockOpenAiService
         $keyword = $variables['keyword'] ?? $variables['target_keyword'] ?? 'argomento specifico';
         $context = strtolower($prompt);
 
+        // Check for campaign generation requests
+        if (str_contains($context, 'rsa') || str_contains($context, 'responsive search ads')) {
+            return $this->generateRSACampaignMock($variables);
+        }
+
+        if (str_contains($context, 'pmax') || str_contains($context, 'performance max')) {
+            return $this->generatePMAXCampaignMock($variables);
+        }
+
         if (str_contains($context, 'articolo') || str_contains($context, 'blog')) {
             return $this->generateBlogArticleMock($keyword);
         }
@@ -213,6 +222,88 @@ La piattaforma Ainstein supporta la generazione di vari tipi di contenuto:
 - E molto altro ancora
 
 *Questo è contenuto demo per scopi di testing della piattaforma.*";
+    }
+
+    /**
+     * Generate mock RSA campaign assets
+     */
+    private function generateRSACampaignMock(array $variables): string
+    {
+        $businessInfo = $variables['business_info'] ?? 'business innovativo';
+        $keywords = $variables['keywords'] ?? 'qualità, innovazione, eccellenza';
+
+        $titles = [
+            "Soluzioni Premium di Qualità",
+            "Offerte Esclusive per Te",
+            "Innovazione al Tuo Servizio",
+            "Qualità Garantita al 100%",
+            "Promozione Speciale Limitata",
+            "Esperienza Unica Garantita",
+            "Servizio Clienti Eccellente",
+            "Risparmia Oggi - Offerta Spec",
+            "Leader nel Settore dal 2024",
+            "Consegna Rapida Garantita",
+            "Prezzi Imbattibili Online",
+            "Soddisfazione Garantita",
+            "Prodotti di Alta Qualità",
+            "Offerta Esclusiva Online",
+            "Scopri le Nostre Novità"
+        ];
+
+        $descriptions = [
+            "Scopri la nostra gamma completa di prodotti e servizi di alta qualità. Offerte esclusive e promozioni speciali.",
+            "Qualità superiore e prezzi competitivi. Servizio clienti dedicato e consegna rapida in tutta Italia.",
+            "Leader nel settore con anni di esperienza. Soluzioni innovative per ogni esigenza. Contattaci ora!",
+            "Garanzia di soddisfazione al 100%. Prodotti certificati e servizio post-vendita eccellente."
+        ];
+
+        $response = [
+            'titles' => $titles,
+            'descriptions' => $descriptions
+        ];
+
+        return json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * Generate mock PMAX campaign assets
+     */
+    private function generatePMAXCampaignMock(array $variables): string
+    {
+        $businessInfo = $variables['business_info'] ?? 'azienda leader';
+        $keywords = $variables['keywords'] ?? 'innovazione, tecnologia, futuro';
+
+        $shortTitles = [
+            "Qualità Premium Garantita",
+            "Offerte Esclusive Online",
+            "Innovazione e Tecnologia",
+            "Servizio Clienti Top",
+            "Promozioni Imperdibili"
+        ];
+
+        $longTitles = [
+            "Scopri la Nostra Gamma Completa di Prodotti e Servizi di Alta Qualità",
+            "Soluzioni Innovative per Ogni Esigenza - Qualità e Convenienza Garantite",
+            "Leader nel Settore con Anni di Esperienza - Affidabilità e Professionalità",
+            "Offerte Esclusive e Promozioni Speciali - Risparmia Oggi con Noi",
+            "Tecnologia Avanzata e Servizio Clienti Eccellente - La Tua Scelta Migliore"
+        ];
+
+        $descriptions = [
+            "Scopri la qualità superiore dei nostri prodotti e servizi. Offerte esclusive, consegna rapida e assistenza dedicata.",
+            "Leader nel settore con soluzioni innovative per ogni esigenza. Qualità certificata e prezzi competitivi garantiti.",
+            "Esperienza e professionalità al tuo servizio. Prodotti di alta qualità e servizio clienti eccellente. Contattaci ora!",
+            "Promozioni speciali e offerte limitate. Garanzia di soddisfazione e assistenza post-vendita dedicata. Ordina oggi!",
+            "Innovazione e tecnologia avanzata per risultati superiori. Affidabilità garantita e supporto completo sempre."
+        ];
+
+        $response = [
+            'titles' => $shortTitles,
+            'long_titles' => $longTitles,
+            'descriptions' => $descriptions
+        ];
+
+        return json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 
     private function generateMockMetaTitle(string $keyword): string

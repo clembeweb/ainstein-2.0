@@ -40,13 +40,18 @@
             @endif
 
             <!-- Tabs Navigation -->
-            <div class="bg-white shadow rounded-lg" x-data="{ activeTab: 'oauth' }">
+            <div class="bg-white shadow rounded-lg" x-data="{ activeTab: 'social' }">
                 <div class="border-b border-gray-200">
                     <nav class="-mb-px flex space-x-8 px-6">
-                        <button @click="activeTab = 'oauth'"
-                                :class="activeTab === 'oauth' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        <button @click="activeTab = 'social'"
+                                :class="activeTab === 'social' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                                 class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
-                            OAuth Integrations
+                            Social Login
+                        </button>
+                        <button @click="activeTab = 'api'"
+                                :class="activeTab === 'api' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                            API Integrations
                         </button>
                         <button @click="activeTab = 'openai'"
                                 :class="activeTab === 'openai' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
@@ -78,8 +83,128 @@
 
                 <!-- Tab Content -->
                 <div class="p-6">
-                    <!-- OAuth Integrations Tab -->
-                    <div x-show="activeTab === 'oauth'">
+                    <!-- Social Login Tab -->
+                    <div x-show="activeTab === 'social'">
+                        <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p class="text-sm text-blue-800">
+                                <strong>ℹ️ Social Login:</strong> Configure Google and Facebook login for user authentication.
+                                These credentials will be used as <strong>fallback</strong> when tenants don't have their own OAuth configuration.
+                                <br><br>
+                                <strong>Note:</strong> Each tenant can override these settings with their own OAuth apps from their dashboard.
+                            </p>
+                        </div>
+
+                        <form action="{{ route('admin.settings.social.update') }}" method="POST" class="space-y-6">
+                            @csrf
+
+                            <!-- Google Social Login -->
+                            <div class="border border-gray-200 rounded-lg p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900">Google Social Login</h3>
+                                        <p class="text-sm text-gray-500 mt-1">For user authentication (not API integration)</p>
+                                    </div>
+                                    @if(!empty($settings->google_social_client_id))
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">✓ Configured</span>
+                                    @else
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">Not configured</span>
+                                    @endif
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Client ID</label>
+                                        <input type="text" name="google_social_client_id"
+                                               value="{{ old('google_social_client_id', $settings->google_social_client_id) }}"
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                               placeholder="123456789-xxxxx.apps.googleusercontent.com">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Client Secret</label>
+                                        <input type="password" name="google_social_client_secret"
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                               placeholder="GOCSPX-xxxxxxxxxxxxx">
+                                    </div>
+                                </div>
+
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <p class="text-xs text-gray-600 mb-2"><strong>Callback URL to use in Google Console:</strong></p>
+                                    <div class="flex items-center space-x-2">
+                                        <code class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded text-sm">{{ url('/auth/google/callback') }}</code>
+                                        <button type="button" onclick="copyToClipboard('{{ url('/auth/google/callback') }}')" class="px-3 py-2 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-sm">
+                                            Copy
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <p class="text-xs text-gray-500 mt-3">
+                                    Get credentials from <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="text-blue-600 underline">Google Cloud Console</a>
+                                </p>
+                            </div>
+
+                            <!-- Facebook Social Login -->
+                            <div class="border border-gray-200 rounded-lg p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900">Facebook Social Login</h3>
+                                        <p class="text-sm text-gray-500 mt-1">For user authentication (not API integration)</p>
+                                    </div>
+                                    @if(!empty($settings->facebook_social_app_id))
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">✓ Configured</span>
+                                    @else
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">Not configured</span>
+                                    @endif
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">App ID</label>
+                                        <input type="text" name="facebook_social_app_id"
+                                               value="{{ old('facebook_social_app_id', $settings->facebook_social_app_id) }}"
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                               placeholder="1234567890123456">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">App Secret</label>
+                                        <input type="password" name="facebook_social_app_secret"
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                               placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+                                    </div>
+                                </div>
+
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <p class="text-xs text-gray-600 mb-2"><strong>Callback URL to use in Facebook Developers:</strong></p>
+                                    <div class="flex items-center space-x-2">
+                                        <code class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded text-sm">{{ url('/auth/facebook/callback') }}</code>
+                                        <button type="button" onclick="copyToClipboard('{{ url('/auth/facebook/callback') }}')" class="px-3 py-2 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-sm">
+                                            Copy
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <p class="text-xs text-gray-500 mt-3">
+                                    Get credentials from <a href="https://developers.facebook.com/apps" target="_blank" class="text-blue-600 underline">Facebook Developers</a>
+                                </p>
+                            </div>
+
+                            <div class="flex justify-end">
+                                <button type="submit" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    Save Social Login Settings
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- API Integrations Tab -->
+                    <div x-show="activeTab === 'api'">
+                        <div class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                            <p class="text-sm text-amber-800">
+                                <strong>⚙️ API Integrations:</strong> These are OAuth credentials for <strong>API access</strong> (Google Ads API, Facebook Ads API, Google Search Console API).
+                                <br>
+                                <strong>Not for user login!</strong> For social login, use the "Social Login" tab.
+                            </p>
+                        </div>
+
                         <form action="{{ route('admin.settings.oauth.update') }}" method="POST" class="space-y-6">
                             @csrf
 
@@ -581,6 +706,18 @@
         })
         .catch(error => {
             alert('✗ Error testing Stripe connection');
+        });
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            // Temporary visual feedback
+            event.target.textContent = 'Copied!';
+            setTimeout(() => {
+                event.target.textContent = 'Copy';
+            }, 2000);
+        }).catch(function(err) {
+            alert('Failed to copy text');
         });
     }
     </script>
