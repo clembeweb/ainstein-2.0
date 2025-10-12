@@ -35,7 +35,8 @@
       "Bash(timeout:*)",
       "Read(//c/Users/cleme/.ssh/**)",
       "Bash(scp:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(git fetch:*)"
     ],
     "deny": [],
     "ask": []
