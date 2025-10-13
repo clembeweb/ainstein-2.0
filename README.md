@@ -7,8 +7,18 @@
 
 ---
 
-## 🎉 LATEST UPDATES (2025-10-06)
+## 🎉 LATEST UPDATES
 
+### 🆕 2025-10-13: CRITICAL OAUTH FIX
+✅ **Social Login Fixed** - OAuth configuration system completely redesigned
+✅ **Two-Section Interface** - Clear separation: Social Login (Blue) vs API Integration (Purple)
+✅ **Callback URLs Displayed** - Now shown directly in admin interface
+✅ **Correct Field Names** - Fixed `google_client_id`, `facebook_client_id` usage
+✅ **Migration Added** - `2025_10_13_164310_add_oauth_api_integration_fields_to_platform_settings.php`
+
+**Critical Fix Details**: [`OAUTH-FIX-2025-10-13.md`](OAUTH-FIX-2025-10-13.md)
+
+### 2025-10-06: Platform Improvements
 ✅ **Content Generator Unified** - 3-tab interface (Pages/Generations/Prompts)
 ✅ **Action Buttons Fixed** - View/Edit/Copy/Delete now visible and functional
 ✅ **FontAwesome Integration** - Global icon library added to layouts
@@ -17,7 +27,8 @@
 ✅ **Guided Onboarding** - 13-step interactive tour complete
 
 **See**:
-- [`SESSION-REPORT-2025-10-06.md`](SESSION-REPORT-2025-10-06.md) - Today's bug fixes and documentation
+- [`OAUTH-FIX-2025-10-13.md`](OAUTH-FIX-2025-10-13.md) - Critical OAuth configuration fix
+- [`SESSION-REPORT-2025-10-06.md`](SESSION-REPORT-2025-10-06.md) - Bug fixes and documentation
 - [`ARCHITECTURE-OVERVIEW.md`](ARCHITECTURE-OVERVIEW.md) - Complete technical architecture (66 KB)
 - [`DEVELOPMENT-ROADMAP.md`](DEVELOPMENT-ROADMAP.md) - 6-month development plan (72 KB)
 
@@ -201,9 +212,11 @@ Demo Tenant Guest:  guest@demo.com / password
 
 ## 🔑 API Keys & OAuth Configuration
 
-### Social Login (User Authentication)
-- 📘 **[Social Login Setup Guide](SOCIAL_LOGIN_SETUP_GUIDE.md)** - Complete OAuth setup for Google & Facebook login
-- 📘 **[Quick Start Guide](SOCIAL_LOGIN_QUICK_START.md)** - Condensed version (45-60 min setup)
+### Social Login (User Authentication) - UPDATED October 13, 2025
+- 🆕 **[OAuth Fix Summary](OAUTH-FIX-2025-10-13.md)** - What was fixed and why
+- 📘 **[Social Login Setup Guide](SOCIAL_LOGIN_SETUP_GUIDE.md)** - Complete OAuth setup (v1.1 - updated)
+- 📘 **[Quick Start Guide](SOCIAL_LOGIN_QUICK_START.md)** - Condensed version (v1.1 - updated)
+- 📊 **[OAuth Settings Analysis](OAUTH-SETTINGS-ANALYSIS.md)** - Technical deep-dive (fixed status)
 
 ### Tool Integration APIs (Obbligatorie per MVP)
 - ✅ **OpenAI API Key** - Già in `.env` → `OPENAI_API_KEY`

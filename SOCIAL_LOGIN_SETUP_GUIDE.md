@@ -1,8 +1,24 @@
 # Social Login Setup Guide - Complete OAuth Configuration
 
-**Version:** 1.0
-**Last Updated:** October 2025
+**Version:** 1.1
+**Last Updated:** October 13, 2025 (Critical Fix Applied)
 **Estimated Total Setup Time:** 45-60 minutes (Google: 20-30 min, Facebook: 25-30 min)
+
+---
+
+## 🆕 IMPORTANT UPDATE (October 13, 2025)
+
+**Critical OAuth Configuration Fix Applied:**
+- The admin interface now has **TWO SEPARATE SECTIONS** for OAuth configuration
+- **Section A (Blue Background)**: Social Login (for user authentication)
+- **Section B (Purple Background)**: API Integrations (for Campaign Generator, SEO Tools)
+- Callback URLs are now **displayed directly in the admin interface**
+- Field naming issue **FIXED** - Social Login now works correctly
+
+**What This Means for You:**
+- Follow this guide to obtain OAuth credentials from Google and Facebook
+- Configure them in the **correct section** of the admin dashboard (Blue section for Social Login)
+- The system will now work correctly
 
 ---
 
@@ -417,85 +433,75 @@ php artisan cache:clear
 
 ---
 
-## Admin Dashboard Configuration
+## Admin Dashboard Configuration (UPDATED October 13, 2025)
 
 The recommended way to configure OAuth settings is through the Admin Dashboard. This allows you to change settings without redeploying or editing .env files.
 
 ### Access Admin Settings
 
-1. Log in to your Ainstein platform as an administrator
-2. Navigate to **Admin Dashboard** (usually `/admin`)
-3. Click on **"Settings"** or **"Platform Settings"**
-4. Select the **"OAuth Integrations"** tab
+1. Log in to your Ainstein platform as an administrator (email: `admin@ainstein.com`, password: `password`)
+2. Navigate to **Admin Dashboard** → **Settings** (URL: `/admin/settings`)
+3. Select the **"OAuth Integrations"** tab
 
-### Configure Google Login
+### TWO SECTIONS - CHOOSE THE CORRECT ONE!
 
-In the Admin Dashboard OAuth section:
+The OAuth Integrations tab is now split into TWO visual sections:
 
-**Note**: Currently, the OAuth Integrations tab shows "Google Ads OAuth" and "Google Search Console OAuth", which are for API integrations (Campaign Generator and SEO Tools), NOT for social login.
+#### ✅ Section A: Social Login (Blue Background) - USE THIS FOR LOGIN
 
-#### Current Implementation Status
+**This is what you need for user authentication!**
 
-As of now, the admin interface shows:
-- ✓ Google Ads OAuth (for Campaign Generator)
-- ✓ Google Search Console OAuth (for SEO Tools)
-- ✓ Facebook OAuth (for Campaign Generator)
+**For Google Social Login:**
+1. Locate **Section A** with the **BLUE background**
+2. Find **"Google Social Login (User Authentication)"** heading
+3. Enter your credentials:
+   - **Google Client ID**: Paste the Client ID from Google Cloud Console
+   - **Google Client Secret**: Paste the Client Secret from Google Cloud Console
+4. **Callback URL is displayed**: `{{APP_URL}}/auth/google/callback`
+   - Make sure this EXACT URL is configured in your Google Cloud Console
+5. Click **"Save OAuth Settings"** button
 
-**The admin interface does NOT yet have separate fields for Social Login OAuth.**
+**For Facebook Social Login:**
+1. In the same **Section A (Blue)**
+2. Find **"Facebook Social Login (User Authentication)"** heading
+3. Enter your credentials:
+   - **Facebook Client ID**: Paste your Facebook App ID
+   - **Facebook Client Secret**: Paste your Facebook App Secret
+4. **Callback URL is displayed**: `{{APP_URL}}/auth/facebook/callback`
+   - Make sure this EXACT URL is configured in your Facebook Developer Portal
+5. Click **"Save OAuth Settings"** button
 
-#### Temporary Workaround
+#### ℹ️ Section B: API Integrations (Purple Background) - NOT FOR LOGIN
 
-Until separate social login fields are added to the admin interface, you have two options:
+**This section is for tool integrations, NOT for user authentication!**
 
-**Option A: Use .env Configuration**
-Configure Google and Facebook OAuth in your `.env` file as described in the [Environment Configuration](#environment-configuration) section.
+This section contains:
+- **Google Ads API** - For Campaign Generator tool
+- **Facebook Ads API** - For Campaign Generator tool
+- **Google Search Console API** - For SEO Tools
 
-**Option B: Use Google Console OAuth for Login**
-The system is configured to fall back to `google_console_client_id` and `google_console_client_secret` for social login if the dedicated social login credentials are not set.
+**Do NOT use Section B for Social Login configuration!**
 
-1. In the Admin Dashboard, go to **OAuth Integrations** tab
-2. Under **"Google Search Console OAuth"** section:
-   - **Client ID**: Paste your Google OAuth Client ID
-   - **Client Secret**: Paste your Google OAuth Client Secret
-3. Click **"Save OAuth Settings"**
+### How the Configuration Works (UPDATED)
 
-**For Facebook:**
-1. Under **"Facebook OAuth"** section:
-   - **App ID**: Paste your Facebook App ID
-   - **App Secret**: Paste your Facebook App Secret
-2. Click **"Save OAuth Settings"**
+**After the October 13, 2025 fix**, the system now uses the CORRECT field names:
 
-> **Note**: This is a temporary workaround. The recommendation is to ask your developer to add dedicated "Social Login" fields to the admin interface, separate from the API integration fields.
+**For Google Social Login:**
+- Primary source: Database field `google_client_id` and `google_client_secret` (Section A - Blue)
+- Fallback: .env variables `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
 
-#### Future Enhancement Recommendation
+**For Facebook Social Login:**
+- Primary source: Database field `facebook_client_id` and `facebook_client_secret` (Section A - Blue)
+- Fallback: .env variables `FACEBOOK_CLIENT_ID` and `FACEBOOK_CLIENT_SECRET`
 
-For clarity and proper separation, consider adding these fields to the admin interface:
+**For API Integrations (NOT Social Login):**
+- Google Ads: `google_ads_client_id`, `google_ads_client_secret` (Section B - Purple)
+- Facebook Ads: `facebook_app_id`, `facebook_app_secret` (Section B - Purple)
+- Google Search Console: `google_console_client_id`, `google_console_client_secret` (Section B - Purple)
 
-**Social Login Providers Section:**
-- Google Login OAuth
-  - Client ID
-  - Client Secret
-- Facebook Login OAuth
-  - App ID
-  - App Secret
+**Database-first approach**: The admin dashboard configuration (database) takes priority over .env files. This means you can change OAuth settings without redeploying your application.
 
-This would be separate from the existing API integration fields.
-
-### How the Configuration Works
-
-The system checks credentials in this order:
-
-**For Google:**
-1. Database: `google_client_id` and `google_client_secret` (dedicated social login fields)
-2. Database: `google_console_client_id` and `google_console_client_secret` (fallback)
-3. .env: `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (final fallback)
-
-**For Facebook:**
-1. Database: `facebook_client_id` and `facebook_client_secret` (dedicated social login fields)
-2. Database: `facebook_app_id` and `facebook_app_secret` (fallback)
-3. .env: `FACEBOOK_CLIENT_ID` and `FACEBOOK_CLIENT_SECRET` (final fallback)
-
-You can verify this in: `C:\laragon\www\ainstein-3\ainstein-laravel\config\services.php`
+**Configuration file**: `C:\laragon\www\ainstein-3\ainstein-laravel\config\services.php` (FIXED to use correct field names)
 
 ### Verify Configuration
 
@@ -1099,6 +1105,14 @@ Recommendation: Add separate "Social Login" section in admin for clarity.
 ---
 
 ## Changelog
+
+**v1.1 - October 13, 2025 - Critical Fix Applied**
+- Updated admin dashboard configuration section with TWO SECTIONS (Blue/Purple)
+- Corrected field names: `google_client_id`, `facebook_client_id` for Social Login
+- Added clear warning about Section B (API Integrations) NOT being for Social Login
+- Updated "How the Configuration Works" section with correct field hierarchy
+- Emphasized callback URL display in admin interface
+- Added prominent update notice at document start
 
 **v1.0 - October 2025**
 - Initial guide created

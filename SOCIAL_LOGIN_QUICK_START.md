@@ -2,6 +2,20 @@
 
 **For developers who need to set up social login quickly**
 
+**Version:** 1.1
+**Last Updated:** October 13, 2025 (Critical Fix Applied)
+
+---
+
+## 🆕 IMPORTANT UPDATE (October 13, 2025)
+
+**Critical OAuth Fix Applied:**
+- Admin interface now has **TWO SEPARATE SECTIONS** (Blue and Purple backgrounds)
+- **Section A (Blue)**: Social Login - USE THIS FOR USER AUTHENTICATION
+- **Section B (Purple)**: API Integrations - NOT for Social Login
+- Callback URLs now **displayed in admin interface**
+- Field naming issue **FIXED** - Social Login works correctly now
+
 This is a condensed version. For complete details, see [SOCIAL_LOGIN_SETUP_GUIDE.md](./SOCIAL_LOGIN_SETUP_GUIDE.md)
 
 ---
@@ -109,23 +123,24 @@ php artisan config:clear
 php artisan cache:clear
 ```
 
-### Option B: Admin Dashboard (Production)
+### Option B: Admin Dashboard (Production) - UPDATED October 13, 2025
 
-**Temporary Workaround:**
+**The admin interface now has dedicated Social Login fields!**
 
-Until dedicated social login fields are added:
-
-1. Login as Admin
+1. Login as Admin (`admin@ainstein.com` / `password`)
 2. Go to: Admin Dashboard > Settings > OAuth Integrations
-3. **For Google**: Use "Google Search Console OAuth" fields
-   - Client ID: Paste Google Client ID
-   - Client Secret: Paste Google Client Secret
-4. **For Facebook**: Use "Facebook OAuth" fields
-   - App ID: Paste Facebook App ID
-   - App Secret: Paste Facebook App Secret
-5. Save settings
+3. **Locate Section A with BLUE BACKGROUND** (Social Login section)
+4. **For Google Social Login:**
+   - Google Client ID: Paste your Google OAuth Client ID
+   - Google Client Secret: Paste your Google OAuth Client Secret
+   - Callback URL is displayed: `{{APP_URL}}/auth/google/callback`
+5. **For Facebook Social Login:**
+   - Facebook Client ID: Paste your Facebook App ID
+   - Facebook Client Secret: Paste your Facebook App Secret
+   - Callback URL is displayed: `{{APP_URL}}/auth/facebook/callback`
+6. Click "Save OAuth Settings"
 
-> **Note**: The system falls back to these fields for social login. Ideally, add dedicated "Social Login" fields in the admin interface.
+> **Important**: Do NOT use Section B (Purple background) - that's for API integrations (Campaign Generator, SEO Tools), NOT for Social Login!
 
 ---
 
@@ -257,5 +272,26 @@ tail -f storage/logs/laravel.log
 
 ---
 
+---
+
+## 📝 What Changed (October 13, 2025)
+
+**Critical OAuth Configuration Fix:**
+- Admin interface split into TWO visual sections (Blue/Purple)
+- Fixed field names: Now uses `google_client_id`, `facebook_client_id` for Social Login
+- Callback URLs now displayed directly in admin panel
+- Clear separation prevents configuration errors
+
+**Migration added:** `2025_10_13_164310_add_oauth_api_integration_fields_to_platform_settings.php`
+
+**Files updated:**
+- `config/services.php` (FIXED field name lookups)
+- `app/Http/Controllers/Admin/PlatformSettingsController.php`
+- `app/Models/PlatformSetting.php`
+- `resources/views/admin/settings/index.blade.php`
+
+---
+
 Generated with Claude Code
 Co-Authored-By: Claude <noreply@anthropic.com>
+Last Updated: October 13, 2025 - Critical OAuth Fix Applied
