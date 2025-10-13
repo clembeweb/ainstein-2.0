@@ -199,9 +199,13 @@ Demo Tenant Guest:  guest@demo.com / password
 
 ---
 
-## 🔑 API Keys Necessarie
+## 🔑 API Keys & OAuth Configuration
 
-### Obbligatorie (MVP)
+### Social Login (User Authentication)
+- 📘 **[Social Login Setup Guide](SOCIAL_LOGIN_SETUP_GUIDE.md)** - Complete OAuth setup for Google & Facebook login
+- 📘 **[Quick Start Guide](SOCIAL_LOGIN_QUICK_START.md)** - Condensed version (45-60 min setup)
+
+### Tool Integration APIs (Obbligatorie per MVP)
 - ✅ **OpenAI API Key** - Già in `.env` → `OPENAI_API_KEY`
 - 🔶 **Google Ads OAuth** - Client ID/Secret (da configurare in admin)
 - 🔶 **Google Search Console OAuth** - JSON credentials
