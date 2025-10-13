@@ -1,25 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(php:*)",
-      "Bash(npm run build:*)",
-      "Bash(composer:*)",
-      "Bash(awk:*)",
-      "Bash(sqlite3:*)",
-      "Bash(for table in users tenants contents prompts content_generations adv_campaigns adv_generated_assets)",
-      "Bash(do echo \"\")",
-      "Bash(echo \"TABLE: $table\")",
-      "Bash(done)",
-      "Bash(find:*)",
-      "Bash(start http://localhost:8000)",
-      "Bash(bash:*)",
-      "Bash(start http://localhost:8000/dashboard/content?tab=generations)",
-      "Bash(chmod:*)",
-      "Bash(git add:*)",
-      "Bash(git checkout:*)",
-      "Bash(git push:*)",
-      "Bash(git tag:*)",
-      "Bash(git commit:*)"
+      "Bash(for route in /dashboard /dashboard/content /dashboard/analytics /dashboard/settings /dashboard/campaigns)",
+      "Bash(do echo -n \"$route: \")",
+      "Bash(for route in /admin /admin/tenants /admin/users /admin/settings /admin/subscriptions)",
+      "Bash(git log:*)",
+      "Bash(git show-ref:*)",
+      "Bash(while read branch)",
+      "Bash(for branch in master production sviluppo-tool emergency/production-500-recovery-2025-10-12 hotfix/security-fixes-2025-10-12)",
+      "Bash(do echo \"=== $branch ===\")"
     ],
     "deny": [],
     "ask": []
