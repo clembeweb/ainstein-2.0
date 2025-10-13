@@ -28,7 +28,9 @@
       "Bash(do echo \"=== $branch ===\")",
       "Bash(git checkout:*)",
       "Bash(git push:*)",
-      "Bash(git tag:*)"
+      "Bash(git tag:*)",
+      "Bash(cat:*)",
+      "Bash(timeout 60 bash test-social-login.sh)"
     ],
     "deny": [],
     "ask": []

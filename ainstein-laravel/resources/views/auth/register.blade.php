@@ -102,6 +102,38 @@
                 </div>
             </form>
 
+            @if(platform_setting('google_client_id') || platform_setting('facebook_client_id'))
+            <!-- Social Login -->
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-gray-50 text-gray-500">Or sign up with</span>
+                    </div>
+                </div>
+
+                <div class="mt-6 grid grid-cols-2 gap-3">
+                    @if(platform_setting('google_client_id'))
+                    <a href="{{ route('social.redirect', 'google') }}"
+                       class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <i class="fab fa-google text-red-500"></i>
+                        <span class="ml-2">Google</span>
+                    </a>
+                    @endif
+
+                    @if(platform_setting('facebook_client_id'))
+                    <a href="{{ route('social.redirect', 'facebook') }}"
+                       class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        <i class="fab fa-facebook text-blue-600"></i>
+                        <span class="ml-2">Facebook</span>
+                    </a>
+                    @endif
+                </div>
+            </div>
+            @endif
+
             <!-- Features -->
             <div class="mt-8 border-t pt-6">
                 <p class="text-center text-sm font-medium text-gray-700 mb-4">What you get:</p>

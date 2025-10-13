@@ -17,6 +17,8 @@ class PlatformSettingsController extends Controller
 
         return view('admin.settings.index', [
             'settings' => $settings,
+            'googleLoginConfigured' => PlatformSetting::isGoogleLoginConfigured(),
+            'facebookLoginConfigured' => PlatformSetting::isFacebookLoginConfigured(),
             'googleAdsConfigured' => PlatformSetting::isGoogleAdsConfigured(),
             'facebookConfigured' => PlatformSetting::isFacebookConfigured(),
             'googleConsoleConfigured' => PlatformSetting::isGoogleConsoleConfigured(),
@@ -28,6 +30,12 @@ class PlatformSettingsController extends Controller
     public function updateOAuth(Request $request)
     {
         $request->validate([
+            // Social Login (for user authentication)
+            'google_client_id' => 'nullable|string',
+            'google_client_secret' => 'nullable|string',
+            'facebook_client_id' => 'nullable|string',
+            'facebook_client_secret' => 'nullable|string',
+            // API Integrations (for tools & services)
             'google_ads_client_id' => 'nullable|string',
             'google_ads_client_secret' => 'nullable|string',
             'facebook_app_id' => 'nullable|string',
@@ -43,6 +51,8 @@ class PlatformSettingsController extends Controller
         }
 
         $setting->update($request->only([
+            'google_client_id', 'google_client_secret',
+            'facebook_client_id', 'facebook_client_secret',
             'google_ads_client_id', 'google_ads_client_secret',
             'facebook_app_id', 'facebook_app_secret',
             'google_console_client_id', 'google_console_client_secret',

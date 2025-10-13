@@ -176,6 +176,26 @@ class PlatformSetting extends Model
     }
 
     /**
+     * Check if Google Social Login is configured (for user authentication)
+     */
+    public static function isGoogleLoginConfigured(): bool
+    {
+        $clientId = self::get('google_client_id');
+        $clientSecret = self::get('google_client_secret');
+        return !empty($clientId) && !empty($clientSecret);
+    }
+
+    /**
+     * Check if Facebook Social Login is configured (for user authentication)
+     */
+    public static function isFacebookLoginConfigured(): bool
+    {
+        $clientId = self::get('facebook_client_id');
+        $clientSecret = self::get('facebook_client_secret');
+        return !empty($clientId) && !empty($clientSecret);
+    }
+
+    /**
      * Check if OpenAI is configured
      */
     public static function isOpenAiConfigured(): bool

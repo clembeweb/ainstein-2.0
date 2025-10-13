@@ -15,7 +15,7 @@
             <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center">
                     <h1 class="text-2xl font-bold text-gray-900">Platform Settings</h1>
-                    <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-700">← Back to Dashboard</a>
+                    <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-700">Back to Dashboard</a>
                 </div>
             </div>
         </div>
@@ -80,98 +80,190 @@
                 <div class="p-6">
                     <!-- OAuth Integrations Tab -->
                     <div x-show="activeTab === 'oauth'">
-                        <form action="{{ route('admin.settings.oauth.update') }}" method="POST" class="space-y-6">
+                        <form action="{{ route('admin.settings.oauth.update') }}" method="POST" class="space-y-8">
                             @csrf
 
-                            <!-- Google Ads -->
-                            <div class="border border-gray-200 rounded-lg p-6">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-lg font-semibold text-gray-900">Google Ads OAuth</h3>
-                                    @if($googleAdsConfigured)
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">✓ Configured</span>
-                                    @else
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">Not configured</span>
-                                    @endif
+                            <!-- SECTION A: SOCIAL LOGIN -->
+                            <div class="mb-8">
+                                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                                    <h2 class="text-xl font-bold text-gray-900 mb-2">Social Login (User Authentication)</h2>
+                                    <p class="text-sm text-gray-700">Configure OAuth credentials for "Sign in with Google/Facebook" buttons on tenant registration and login pages.</p>
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Client ID</label>
-                                        <input type="text" name="google_ads_client_id"
-                                               value="{{ old('google_ads_client_id', $settings->google_ads_client_id) }}"
-                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                               placeholder="123456789-xxxxx.apps.googleusercontent.com">
+                                <!-- Google Social Login -->
+                                <div class="border border-gray-200 rounded-lg p-6 mb-4">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="text-lg font-semibold text-gray-900">Google Social Login</h3>
+                                        @if($googleLoginConfigured)
+                                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">✓ Configured</span>
+                                        @else
+                                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">Not configured</span>
+                                        @endif
                                     </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Client Secret</label>
-                                        <input type="password" name="google_ads_client_secret"
-                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                               placeholder="GOCSPX-xxxxxxxxxxxxx">
+
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Client ID</label>
+                                            <input type="text" name="google_client_id"
+                                                   value="{{ old('google_client_id', $settings->google_client_id) }}"
+                                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                   placeholder="123456789-xxxxx.apps.googleusercontent.com">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Client Secret</label>
+                                            <input type="password" name="google_client_secret"
+                                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                   placeholder="GOCSPX-xxxxxxxxxxxxx">
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-3">
+                                        <p class="text-xs font-semibold text-amber-900 mb-1">Callback URL da configurare in Google Cloud Console:</p>
+                                        <code class="text-xs text-amber-800 bg-amber-100 px-2 py-1 rounded">{{ config('app.url') }}/auth/google/callback</code>
+                                        <p class="text-xs text-gray-600 mt-2">
+                                            Abilita il pulsante "Accedi con Google" per gli utenti tenant. Ottieni le credenziali da <a href="https://console.cloud.google.com/" target="_blank" class="text-blue-600 underline">Google Cloud Console</a>
+                                        </p>
                                     </div>
                                 </div>
 
-                                <p class="text-xs text-gray-500 mt-3">
-                                    Get credentials from <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="text-blue-600 underline">Google Cloud Console</a>
-                                </p>
+                                <!-- Facebook Social Login -->
+                                <div class="border border-gray-200 rounded-lg p-6">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="text-lg font-semibold text-gray-900">Facebook Social Login</h3>
+                                        @if($facebookLoginConfigured)
+                                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">✓ Configured</span>
+                                        @else
+                                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">Not configured</span>
+                                        @endif
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Client ID (App ID)</label>
+                                            <input type="text" name="facebook_client_id"
+                                                   value="{{ old('facebook_client_id', $settings->facebook_client_id) }}"
+                                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                   placeholder="1234567890123456">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Client Secret (App Secret)</label>
+                                            <input type="password" name="facebook_client_secret"
+                                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                   placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-3">
+                                        <p class="text-xs font-semibold text-amber-900 mb-1">Callback URL da configurare in Facebook Developer Console:</p>
+                                        <code class="text-xs text-amber-800 bg-amber-100 px-2 py-1 rounded">{{ config('app.url') }}/auth/facebook/callback</code>
+                                        <p class="text-xs text-gray-600 mt-2">
+                                            Abilita il pulsante "Accedi con Facebook" per gli utenti tenant. Ottieni le credenziali da <a href="https://developers.facebook.com/" target="_blank" class="text-blue-600 underline">Facebook Developers</a>
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
 
-                            <!-- Facebook -->
-                            <div class="border border-gray-200 rounded-lg p-6">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-lg font-semibold text-gray-900">Facebook OAuth</h3>
-                                    @if($facebookConfigured)
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">✓ Configured</span>
-                                    @else
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">Not configured</span>
-                                    @endif
+                            <!-- SECTION B: API INTEGRATIONS -->
+                            <div class="mt-8">
+                                <div class="bg-purple-50 border-l-4 border-purple-500 p-4 mb-6">
+                                    <h2 class="text-xl font-bold text-gray-900 mb-2">API Integrations (For Tools & Services)</h2>
+                                    <p class="text-sm text-gray-700">Configure API credentials for advertising platforms and SEO tools used by the platform's features.</p>
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">App ID</label>
-                                        <input type="text" name="facebook_app_id"
-                                               value="{{ old('facebook_app_id', $settings->facebook_app_id) }}"
-                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                               placeholder="1234567890123456">
+                                <!-- Google Ads API -->
+                                <div class="border border-gray-200 rounded-lg p-6 mb-4">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="text-lg font-semibold text-gray-900">Google Ads API</h3>
+                                        @if($googleAdsConfigured)
+                                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">✓ Configured</span>
+                                        @else
+                                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">Not configured</span>
+                                        @endif
                                     </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">App Secret</label>
-                                        <input type="password" name="facebook_app_secret"
-                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                               placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Client ID</label>
+                                            <input type="text" name="google_ads_client_id"
+                                                   value="{{ old('google_ads_client_id', $settings->google_ads_client_id) }}"
+                                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                   placeholder="123456789-xxxxx.apps.googleusercontent.com">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Client Secret</label>
+                                            <input type="password" name="google_ads_client_secret"
+                                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                   placeholder="GOCSPX-xxxxxxxxxxxxx">
+                                        </div>
                                     </div>
+
+                                    <p class="text-xs text-gray-500 mt-3">
+                                        For Google Ads campaign management tools. Get credentials from <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="text-blue-600 underline">Google Cloud Console</a>
+                                    </p>
                                 </div>
 
-                                <p class="text-xs text-gray-500 mt-3">
-                                    Get credentials from <a href="https://developers.facebook.com/apps" target="_blank" class="text-blue-600 underline">Facebook Developers</a>
-                                </p>
-                            </div>
+                                <!-- Facebook Ads API -->
+                                <div class="border border-gray-200 rounded-lg p-6 mb-4">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="text-lg font-semibold text-gray-900">Facebook Ads API</h3>
+                                        @if($facebookConfigured)
+                                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">✓ Configured</span>
+                                        @else
+                                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">Not configured</span>
+                                        @endif
+                                    </div>
 
-                            <!-- Google Search Console -->
-                            <div class="border border-gray-200 rounded-lg p-6">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-lg font-semibold text-gray-900">Google Search Console OAuth</h3>
-                                    @if($googleConsoleConfigured)
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">✓ Configured</span>
-                                    @else
-                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">Not configured</span>
-                                    @endif
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">App ID</label>
+                                            <input type="text" name="facebook_app_id"
+                                                   value="{{ old('facebook_app_id', $settings->facebook_app_id) }}"
+                                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                   placeholder="1234567890123456">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">App Secret</label>
+                                            <input type="password" name="facebook_app_secret"
+                                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                   placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+                                        </div>
+                                    </div>
+
+                                    <p class="text-xs text-gray-500 mt-3">
+                                        For Facebook Ads campaign management tools. Get credentials from <a href="https://developers.facebook.com/apps" target="_blank" class="text-blue-600 underline">Facebook Developers</a>
+                                    </p>
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Client ID</label>
-                                        <input type="text" name="google_console_client_id"
-                                               value="{{ old('google_console_client_id', $settings->google_console_client_id) }}"
-                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                               placeholder="123456789-xxxxx.apps.googleusercontent.com">
+                                <!-- Google Search Console API -->
+                                <div class="border border-gray-200 rounded-lg p-6">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="text-lg font-semibold text-gray-900">Google Search Console API</h3>
+                                        @if($googleConsoleConfigured)
+                                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">✓ Configured</span>
+                                        @else
+                                            <span class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">Not configured</span>
+                                        @endif
                                     </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Client Secret</label>
-                                        <input type="password" name="google_console_client_secret"
-                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                               placeholder="GOCSPX-xxxxxxxxxxxxx">
+
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Client ID</label>
+                                            <input type="text" name="google_console_client_id"
+                                                   value="{{ old('google_console_client_id', $settings->google_console_client_id) }}"
+                                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                   placeholder="123456789-xxxxx.apps.googleusercontent.com">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Client Secret</label>
+                                            <input type="password" name="google_console_client_secret"
+                                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                   placeholder="GOCSPX-xxxxxxxxxxxxx">
+                                        </div>
                                     </div>
+
+                                    <p class="text-xs text-gray-500 mt-3">
+                                        For SEO and search analytics tools. Get credentials from <a href="https://console.cloud.google.com/apis/credentials" target="_blank" class="text-blue-600 underline">Google Cloud Console</a>
+                                    </p>
                                 </div>
                             </div>
 
