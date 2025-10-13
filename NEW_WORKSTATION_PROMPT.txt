@@ -1,0 +1,213 @@
+PROMPT TO GIVE TO NEW CLAUDE INSTANCE:
+=====================================
+
+Hi Claude! I need your immediate assistance with an **EMERGENCY PRODUCTION RECOVERY** situation. Please read this entire message before taking any action.
+
+## 🚨 CRITICAL SITUATION OVERVIEW
+
+**PRODUCTION IS DOWN** - The Ainstein platform at https://app.ainstein.tech is showing a 500 error after a failed deployment attempt. This is a critical situation requiring immediate action.
+
+**What happened:**
+- Security fixes were applied directly via SCP (wrong method) which broke production
+- The previous Claude session has saved all work to GitHub
+- A complete recovery plan exists in the repository documentation
+- We need to setup a new development environment and fix production ASAP
+
+## 📋 YOUR MISSION
+
+You need to:
+1. Clone the repository and setup local environment
+2. Read the handoff documentation to understand the full context
+3. Connect to the production server
+4. Execute the emergency rollback procedure
+5. Restore production functionality
+
+## 🔧 STEP 1: CLONE AND SETUP
+
+Execute these commands in sequence:
+
+```bash
+# 1. Clone the repository
+cd C:\laragon\www
+git clone https://github.com/clembeweb/ainstein-2.0.git ainstein-3
+cd ainstein-3
+
+# 2. Checkout the emergency recovery branch
+git checkout hotfix/security-fixes-2025-10-12
+
+# 3. Setup Laravel environment
+copy .env.example .env
+composer install --no-interaction
+php artisan key:generate
+npm install
+npm run build
+
+# 4. Configure SQLite database
+echo "" > database/database.sqlite
+php artisan migrate --force
+```
+
+## 📚 STEP 2: READ CRITICAL DOCUMENTATION
+
+**IMMEDIATELY after setup, read these files in this exact order:**
+
+1. **HANDOFF_RESUME.md** - Complete recovery guide with 10-step plan
+2. **DEPLOYMENT_STATUS.md** - Current state of production and what went wrong
+3. **BRANCH_STRATEGY.md** - Understanding the branch organization
+4. **EMERGENCY_RECOVERY.md** - Specific rollback procedures
+
+These files contain:
+- The exact error that occurred
+- The complete recovery plan
+- Server access details
+- Rollback procedures
+- Testing requirements
+
+## 🖥️ STEP 3: PRODUCTION SERVER ACCESS
+
+**Server Details:**
+- **IP Address:** 135.181.42.233
+- **SSH Access:** root@135.181.42.233
+- **SSH Key Location:** ~/.ssh/ainstein_ploi
+- **Laravel Root:** /var/www/ainstein
+- **Important Tag:** pre-emergency-2025-10-12 (last known good state)
+
+**To connect:**
+```bash
+ssh -i ~/.ssh/ainstein_ploi root@135.181.42.233
+```
+
+## 🔄 STEP 4: EMERGENCY ROLLBACK PROCEDURE
+
+**Follow the 10-step recovery plan from HANDOFF_RESUME.md:**
+
+1. **Assess current production state**
+   ```bash
+   ssh root@135.181.42.233
+   cd /var/www/ainstein
+   git status
+   php artisan config:cache status
+   tail -n 100 storage/logs/laravel.log
+   ```
+
+2. **Create safety backup**
+   ```bash
+   cp -r /var/www/ainstein /var/www/ainstein-backup-$(date +%Y%m%d-%H%M%S)
+   ```
+
+3. **Rollback to safe tag**
+   ```bash
+   cd /var/www/ainstein
+   git fetch origin
+   git checkout pre-emergency-2025-10-12
+   ```
+
+4. **Clear all caches**
+   ```bash
+   php artisan config:clear
+   php artisan cache:clear
+   php artisan route:clear
+   php artisan view:clear
+   rm -rf bootstrap/cache/*.php
+   ```
+
+5. **Restore production functionality**
+   ```bash
+   composer install --no-dev --optimize-autoloader
+   php artisan config:cache
+   php artisan route:cache
+   php artisan view:cache
+   php artisan queue:restart
+   ```
+
+6. **Verify production is working**
+   - Check https://app.ainstein.tech
+   - Login should work
+   - No 500 errors
+
+## 🎯 PRIORITY ACTIONS
+
+**IMMEDIATE (First 15 minutes):**
+1. Clone repository and read HANDOFF_RESUME.md
+2. SSH to production and check current state
+3. Review error logs to understand the failure
+4. Execute rollback if production is still down
+
+**SHORT TERM (Next hour):**
+1. Get production stable
+2. Document what caused the issue
+3. Prepare proper deployment via Ploi
+4. Test fixes locally before deploying
+
+## ⚠️ CRITICAL WARNINGS
+
+**DO NOT:**
+- Use SCP to copy files to production (this caused the current problem)
+- Make direct edits on production server
+- Skip the backup step before any changes
+- Deploy untested code
+
+**ALWAYS:**
+- Use Ploi deployment system for production updates
+- Test locally first
+- Keep backups before changes
+- Follow the deployment checklist
+
+## 🔑 KEY INFORMATION
+
+**GitHub Repository:** https://github.com/clembeweb/ainstein-2.0.git
+**Production URL:** https://app.ainstein.tech
+**Ploi Dashboard:** https://ploi.io (credentials in HANDOFF_RESUME.md)
+**Error Type:** 500 Internal Server Error (likely cache/permission issue)
+
+**Branch Structure:**
+- `master` - Production branch
+- `sviluppo-tool` - Development branch
+- `hotfix/security-fixes-2025-10-12` - Emergency recovery branch with all fixes
+
+**What was being fixed:**
+1. Session timeout (set to 4 hours)
+2. Token expiration (90 days for remember me)
+3. Security headers
+4. CSRF protection
+5. SQL injection prevention
+
+## 📝 RECOVERY CHECKLIST
+
+Use this checklist to track your progress:
+
+- [ ] Repository cloned successfully
+- [ ] Local environment setup complete
+- [ ] HANDOFF_RESUME.md read and understood
+- [ ] SSH access to production verified
+- [ ] Current production state assessed
+- [ ] Backup created
+- [ ] Rollback executed
+- [ ] Caches cleared
+- [ ] Production verified working
+- [ ] Error documented in RECOVERY_LOG.md
+
+## 🆘 IF YOU GET STUCK
+
+1. The complete context is in HANDOFF_RESUME.md
+2. Previous session notes are in DEPLOYMENT_STATUS.md
+3. All security fixes are already committed to GitHub
+4. The tag 'pre-emergency-2025-10-12' is your safe rollback point
+5. Production was working perfectly before the SCP deployment
+
+## 🎬 START NOW
+
+**Your first command should be:**
+```bash
+cd C:\laragon\www && git clone https://github.com/clembeweb/ainstein-2.0.git ainstein-3 && cd ainstein-3 && git checkout hotfix/security-fixes-2025-10-12
+```
+
+Then immediately read `HANDOFF_RESUME.md` for the complete recovery guide.
+
+**Time is critical - production is down and needs immediate attention!**
+
+Good luck, and remember: the rollback to 'pre-emergency-2025-10-12' is your safest immediate action if production is still showing errors.
+
+---
+
+*Note: This is an emergency handoff. The previous Claude session has documented everything thoroughly. Trust the documentation in the repository, especially HANDOFF_RESUME.md which contains the complete 10-step recovery plan.*

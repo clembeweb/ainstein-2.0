@@ -593,12 +593,30 @@ class TenantDashboardController extends Controller
     /**
      * Get average completion time for successful generations
      */
+
     private function getAverageCompletionTime(string $tenantId, array $dateRange): ?float
     {
-        return ContentGeneration::where('tenant_id', $tenantId)
+        $generations = ContentGeneration::where('tenant_id', $tenantId)
             ->where('status', 'completed')
             ->whereBetween('created_at', [$dateRange['start'], $dateRange['end']])
             ->whereNotNull('completed_at')
-            ->avg(\DB::raw('TIMESTAMPDIFF(SECOND, created_at, completed_at)'));
+            ->get(['created_at', 'completed_at']);
+
+        if ($generations->isEmpty()) {
+            return null;
+        }
+
+        $totalSeconds = $generations->sum(function ($generation) {
+            return $generation->completed_at->diffInSeconds($generation->created_at);
+        });
+
+        return $totalSeconds / $generations->count();
     }
+
+
+
+
+
+
+
 }

@@ -17,7 +17,18 @@
       "Bash(chmod:*)",
       "Bash(git add:*)",
       "Bash(git merge:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(for route in /dashboard /dashboard/content /dashboard/analytics /dashboard/settings /dashboard/campaigns)",
+      "Bash(do echo -n \"$route: \")",
+      "Bash(for route in /admin /admin/tenants /admin/users /admin/settings /admin/subscriptions)",
+      "Bash(git log:*)",
+      "Bash(git show-ref:*)",
+      "Bash(while read branch)",
+      "Bash(for branch in master production sviluppo-tool emergency/production-500-recovery-2025-10-12 hotfix/security-fixes-2025-10-12)",
+      "Bash(do echo \"=== $branch ===\")",
+      "Bash(git checkout:*)",
+      "Bash(git push:*)",
+      "Bash(git tag:*)"
     ],
     "deny": [],
     "ask": []
